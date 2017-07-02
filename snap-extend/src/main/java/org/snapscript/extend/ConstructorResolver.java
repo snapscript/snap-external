@@ -1,8 +1,8 @@
 package org.snapscript.extend;
 
+import static org.snapscript.core.Reserved.TYPE_CONSTRUCTOR;
+
 import org.snapscript.core.Bug;
-import org.snapscript.core.Context;
-import org.snapscript.core.Reserved;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.ObjectFunctionMatcher;
@@ -11,12 +11,16 @@ import org.snapscript.core.function.Signature;
 
 @Bug("This does not cache the data")
 public class ConstructorResolver {
+   
+   private final ObjectFunctionMatcher matcher;
+   
+   public ConstructorResolver(ObjectFunctionMatcher matcher) {
+      this.matcher = matcher;
+   }
 
-   public static ConstructorData findConstructor(Scope scope, Type type, Object... args) {
+   public ConstructorData findConstructor(Scope scope, Type type, Object... args) {
       try {
-         final Context c = scope.getModule().getContext();
-         final ObjectFunctionMatcher matcher = new ObjectFunctionMatcher(c.getExtractor(), c.getStack());
-         Function function = matcher.resolve(type, Reserved.TYPE_CONSTRUCTOR, args);
+         Function function = matcher.resolve(type, TYPE_CONSTRUCTOR, args);
          Signature signature = function.getSignature();
          Object[] list = signature.getConverter().convert(args);
          Class[] types = new Class[args.length];

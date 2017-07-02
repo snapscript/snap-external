@@ -28,11 +28,13 @@ public class ClassExtender implements TypeExtender {
    private final Cache<Method, Invocation> invocations;
    private final AtomicReference<Class> reference;
    private final ObjectFunctionMatcher matcher;
+   private final ConstructorResolver resolver;
    private final Type type;
    
    public ClassExtender(ObjectFunctionMatcher matcher, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
       this.reference = new AtomicReference<Class>();
+      this.resolver = new ConstructorResolver(matcher);
       this.matcher = matcher;
       this.type = type;
    }
@@ -64,7 +66,7 @@ public class ClassExtender implements TypeExtender {
          Class proxyClass = getProxyClass(type);
          final Context context = scope.getModule().getContext();
          final Type t = context.getLoader().loadType(type);
-         ConstructorData data = ConstructorResolver.findConstructor(scope, t, args);
+         ConstructorData data = resolver.findConstructor(scope, t, args);
          Factory mock = (Factory)proxyClass.getDeclaredConstructor(data.getTypes()).newInstance(args);
          mock.setCallbacks(new Callback[]{handler});
          return mock;

@@ -27,11 +27,13 @@ public class AndroidExtender implements TypeExtender {
    private final Cache<Method, Invocation> invocations;
    private final AtomicReference<Class> reference;
    private final ObjectFunctionMatcher matcher;
+   private final ConstructorResolver resolver;
    private final Type type;
    
    public AndroidExtender(ObjectFunctionMatcher matcher, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
       this.reference = new AtomicReference<Class>();
+      this.resolver = new ConstructorResolver(matcher);
       this.matcher = matcher;
       this.type = type;
    }
@@ -65,7 +67,7 @@ public class AndroidExtender implements TypeExtender {
          final Type t = c.getLoader().loadType(typeToMock);
           Class proxyClass = getProxyClass(typeToMock);
           //Object mock = unsafeAllocator.newInstance(proxyClass);
-          ConstructorData data = ConstructorResolver.findConstructor(scope, t, args);
+          ConstructorData data = resolver.findConstructor(scope, t, args);
           Object mock = proxyClass.getDeclaredConstructor(data.getTypes()).newInstance(args);
           ProxyBuilder.setInvocationHandler(mock, handler);
           return mock;

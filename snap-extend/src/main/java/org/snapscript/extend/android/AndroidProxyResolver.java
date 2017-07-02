@@ -20,7 +20,7 @@ public class AndroidProxyResolver {
    public static Invocation getSuperCall(Class type, String name, Class... types) {
       try {
          Method method = type.getDeclaredMethod(name, types);
-         return AndroidProxyResolver.getSuperCall(type, method);
+         return getSuperCall(type, method);
       } catch (Exception e) {
          return null;
       }
