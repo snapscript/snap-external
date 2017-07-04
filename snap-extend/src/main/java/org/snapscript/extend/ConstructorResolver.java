@@ -5,16 +5,16 @@ import static org.snapscript.core.Reserved.TYPE_CONSTRUCTOR;
 import org.snapscript.core.Bug;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
-import org.snapscript.core.bind.ObjectFunctionMatcher;
+import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Signature;
 
 @Bug("This does not cache the data")
 public class ConstructorResolver {
    
-   private final ObjectFunctionMatcher matcher;
+   private final FunctionResolver matcher;
    
-   public ConstructorResolver(ObjectFunctionMatcher matcher) {
+   public ConstructorResolver(FunctionResolver matcher) {
       this.matcher = matcher;
    }
 

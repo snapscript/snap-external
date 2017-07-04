@@ -11,7 +11,7 @@ import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 
-public class MethodProxyResolver {
+public class NormalProxyResolver {
 
    public static Invocation getSuperCall(Class type, Method method) {
       String name = method.getName();

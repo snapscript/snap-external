@@ -11,7 +11,7 @@ import org.snapscript.dx.stock.ProxyBuilder;
 
 public class AndroidProxyResolver {
 
-   public static Invocation getSuperCall(Class type, Method method) {
+   public static Invocation getSuperCall(Method method) {
       return new SuperCallProxy(method);
    }
    
@@ -20,7 +20,7 @@ public class AndroidProxyResolver {
    public static Invocation getSuperCall(Class type, String name, Class... types) {
       try {
          Method method = type.getDeclaredMethod(name, types);
-         return getSuperCall(type, method);
+         return getSuperCall(method);
       } catch (Exception e) {
          return null;
       }
