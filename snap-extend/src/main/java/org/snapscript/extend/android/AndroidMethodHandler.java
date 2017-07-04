@@ -14,8 +14,8 @@ import org.snapscript.extend.AbstractHandler;
 @Bug("this is a total mess")
 public class AndroidMethodHandler extends AbstractHandler implements InvocationHandler  {
 
-   public AndroidMethodHandler(Instance inst, Scope scope, FunctionResolver matcher, Context c) {
-      super(inst, scope, matcher, c);
+   public AndroidMethodHandler(FunctionResolver matcher, Instance inst, Scope scope, Context c) {
+      super(matcher, inst, scope, c);
    }
 
    @Override

@@ -15,13 +15,13 @@ import org.snapscript.extend.AbstractHandler;
 @Bug("this is a total mess")
 public class NormalHandler extends AbstractHandler implements MethodInterceptor  {
    
-   public NormalHandler(Instance inst, Scope scope, FunctionResolver matcher, Context c) {
-      super(inst, scope, matcher, c);
+   public NormalHandler(FunctionResolver matcher, Instance instance, Scope scope, Context context) {
+      super(matcher, instance, scope, context);
    }
 
    @Override
-   public Object intercept(Object obj, Method method, Object[] args, MethodProxy sssss) throws Throwable {
-      return invoke(obj, method, args);
+   public Object intercept(Object object, Method method, Object[] list, MethodProxy proxy) throws Throwable {
+      return invoke(object, method, list);
    }
 
    @Override

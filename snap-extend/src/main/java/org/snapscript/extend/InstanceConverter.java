@@ -1,11 +1,13 @@
 package org.snapscript.extend;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.snapscript.core.Reserved.TYPE_THIS;
+
+import java.util.List;
 
 import org.snapscript.core.Bug;
-import org.snapscript.core.Reserved;
+import org.snapscript.core.State;
 import org.snapscript.core.Type;
+import org.snapscript.core.Value;
 import org.snapscript.core.ValueType;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.property.Property;
@@ -14,28 +16,32 @@ import org.snapscript.core.property.PropertyValue;
 public class InstanceConverter {
 
    @Bug("The converter shoud cache the data to be created")
-   public static void convert(final Type t, Instance inst, Object obj) {
-      Map<String, Property> properties = new HashMap<String, Property>();
-      inst.getState().add("real", ValueType.getReference(obj, t));
-      inst.getState().add(Reserved.TYPE_THIS, ValueType.getReference(inst));
-      for(Property prop : t.getProperties()) {
-         String name = prop.getName();
-         if(!properties.containsKey(name)) {
-            properties.put(name, prop);
-            try {
-               inst.getState().add(name, new PropertyValue(prop, obj, name));
-            }catch(Exception e){}
-         }
+   public static void convert(Instance instance, Object object, Type type) {
+      Value real = ValueType.getReference(object, type);
+      Value self = ValueType.getReference(instance);
+      List<Type> types = type.getTypes();
+      State state = instance.getState();
+      
+      instance.getState().add("real", real);
+      instance.getState().add(TYPE_THIS, self);
+      
+      update(state, object, type);
+      
+      for(Type x : types) {
+         update(state, object, x);
       }
-      for(Type x : t.getTypes()) {
-         for(Property prop : x.getProperties()) {
-            String name = prop.getName();
-            if(!properties.containsKey(name)) {
-               properties.put(name, prop);
-               try {
-                  inst.getState().add(name, new PropertyValue(prop, obj, name));
-               }catch(Exception e){}
-            }
+   }
+
+   private static void update(State state, Object object, Type type) {
+      List<Property> properties = type.getProperties();
+      
+      for(Property prop : properties) {
+         String name = prop.getName();
+         Object current = state.get(name);
+         
+         if(current == null) {
+            Value value = new PropertyValue(prop, object, name);
+            state.add(name, value);
          }
       }
    }
