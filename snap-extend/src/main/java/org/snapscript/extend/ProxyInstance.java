@@ -10,12 +10,14 @@ import org.snapscript.core.define.Instance;
 
 public class ProxyInstance implements Instance {
 
-   private State state;
-   private Type type;
-   private Type real;
+   private final Module module;
+   private final State state;
+   private final Type type;
+   private final Type real;
 
-   public ProxyInstance(Scope scope, Type type, Type real) {
+   public ProxyInstance(Module module, Scope scope, Type type, Type real) {
       this.state = new MapState();
+      this.module = module;
       this.type = type;
       this.real = real;
    }
@@ -27,7 +29,7 @@ public class ProxyInstance implements Instance {
 
    @Override
    public Module getModule() {
-      return type.getModule();
+      return module;
    }
 
    @Override
@@ -59,5 +61,4 @@ public class ProxyInstance implements Instance {
    public Instance getSuper() {
       return this;
    }
-
 }

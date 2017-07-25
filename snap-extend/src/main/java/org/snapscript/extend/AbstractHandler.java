@@ -12,18 +12,19 @@ import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.generate.TypeExtender;
 
 public abstract class AbstractHandler {
 
-   private final FunctionResolver matcher;
-   private final Instance instance;
-   private final Context context;
-   private final Scope scope;
+   protected final FunctionResolver matcher;
+   protected final TypeExtender extender;
+   protected final Instance instance;
+   protected final Scope scope;
    
-   public AbstractHandler(FunctionResolver matcher, Instance instance, Scope scope, Context context) {
+   public AbstractHandler(FunctionResolver matcher, TypeExtender extender, Instance instance, Scope scope) {
       this.instance = instance;
+      this.extender = extender;
       this.matcher = matcher;
-      this.context = context;
       this.scope = scope;
    }
 
@@ -45,11 +46,14 @@ public abstract class AbstractHandler {
       if (call == null) {
          return getSuperCall(obj.getClass(), method).invoke(real, obj, args).getValue(); // here the ScopeDispatcher needs to say SuperInstance::getObject --> MethodProxy::ivokeSuper
       }
+      Context context = scope.getModule().getContext();
       Result result = call.call();
       Object res = result.getValue();
       
       return context.getWrapper().fromProxy(res);
    }
    
-   protected abstract Invocation getSuperCall(Class type, Method method);
+   private Invocation getSuperCall(Class type, Method method) {
+      return extender.createSuper(scope, type, method);
+   }
 }

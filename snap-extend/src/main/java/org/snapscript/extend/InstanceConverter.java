@@ -1,5 +1,6 @@
 package org.snapscript.extend;
 
+import static org.snapscript.core.Reserved.TYPE_SUPER;
 import static org.snapscript.core.Reserved.TYPE_THIS;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public class InstanceConverter {
       List<Type> types = type.getTypes();
       State state = instance.getState();
       
-      instance.getState().add("real", real);
-      instance.getState().add(TYPE_THIS, self);
+      state.add(TYPE_SUPER, real);
+      state.add(TYPE_THIS, self);
       
       update(state, object, type);
       
