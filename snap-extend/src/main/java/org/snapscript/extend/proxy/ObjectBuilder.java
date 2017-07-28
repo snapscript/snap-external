@@ -2,10 +2,10 @@ package org.snapscript.extend.proxy;
 
 import org.snapscript.core.Context;
 import org.snapscript.core.Module;
+import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeLoader;
 import org.snapscript.core.bind.FunctionResolver;
-import org.snapscript.core.define.Instance;
 
 public class ObjectBuilder {
    
@@ -17,13 +17,13 @@ public class ObjectBuilder {
       this.generator = generator;
    }
 
-   public Object create(Instance instance, Class type, Object... arguments) throws Exception {
-      Class proxy = generator.generate(instance, type);
-      Module module = instance.getModule();
+   public Object create(Scope scope, Class type, Object... arguments) throws Exception {
+      Class proxy = generator.generate(scope, type);
+      Module module = scope.getModule();
       Context context = module.getContext();
       TypeLoader loader = context.getLoader();
       Type match = loader.loadType(type);
-      ConstructorArguments data = resolver.findConstructor(instance, match, arguments);
+      ConstructorArguments data = resolver.findConstructor(scope, match, arguments);
       Object[] converted = data.getArguments();
       Class[] types = data.getTypes();
       

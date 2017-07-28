@@ -1,6 +1,5 @@
 package org.snapscript.extend;
 
-import static org.snapscript.core.Reserved.TYPE_SUPER;
 import static org.snapscript.core.Reserved.TYPE_THIS;
 
 import java.util.List;
@@ -18,12 +17,10 @@ public class InstanceConverter {
 
    @Bug("The converter shoud cache the data to be created")
    public static void convert(Instance instance, Object object, Type type) {
-      Value real = ValueType.getReference(object, type);
       Value self = ValueType.getReference(instance);
       List<Type> types = type.getTypes();
       State state = instance.getState();
       
-      state.add(TYPE_SUPER, real);
       state.add(TYPE_THIS, self);
       
       update(state, object, type);

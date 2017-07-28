@@ -39,9 +39,9 @@ public class AndroidExtender implements TypeExtender {
 
    @Override
    public Instance createInstance(Scope scope, Type real, Object... args) {
-      Module module = scope.getModule();
-      Instance inst = new ProxyInstance(module, scope, type, real);
-      Object obj = getExtendedClass(scope, inst, type, args);
+
+      Instance inst = getExtendedClass(scope, real, type, args);
+      Object obj = inst.getObject();
       InstanceConverter.convert(inst, obj, type);
       return inst;
    }
@@ -57,13 +57,15 @@ public class AndroidExtender implements TypeExtender {
       return invocation;
    }
 
-   private Object getExtendedClass(Scope scope, Instance inst, Type tt, Object... args) {
+   private Instance getExtendedClass(Scope scope, Type real, Type tt, Object... args) {
       Class typeToMock = tt.getType();
-      InvocationHandler handler = getHandler(scope, inst);
       try {
-         Object mock = builder.create(inst, typeToMock, args);
+         Module module = scope.getModule();
+         Object mock = builder.create(scope, typeToMock, args);
+         Instance inst = new ProxyInstance(module, mock, type, real);
+         InvocationHandler handler = getHandler(scope, inst);
          ProxyBuilder.setInvocationHandler(mock, handler);
-         return mock;
+         return inst;
       } catch (Exception e) {
          throw new IllegalStateException("Failed to mock " + typeToMock, e);
       }

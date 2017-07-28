@@ -7,7 +7,6 @@ import org.snapscript.cglib.proxy.Factory;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Bug;
-import org.snapscript.core.Context;
 import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
@@ -39,9 +38,8 @@ public class NormalExtender implements TypeExtender {
 
    @Override
    public Instance createInstance(Scope scope, Type real, Object... args) {
-      Module module = scope.getModule();
-      Instance inst = new ProxyInstance(module, scope, type, real);
-      Object obj = getExtendedClass(scope, inst, type, args);
+      Instance inst = getExtendedClass(scope, real, type, args);
+      Object obj = inst.getObject();
       InstanceConverter.convert(inst, obj, type);
       return inst;
    }
@@ -61,13 +59,15 @@ public class NormalExtender implements TypeExtender {
       return NormalProxyResolver.getSuperCall(proxy, method);
    }
 
-   private Object getExtendedClass(Scope scope, Instance inst, Type tt, Object... args) {
-      Class type = tt.getType();
+   private Instance getExtendedClass(Scope scope, Type real, Type tt, Object... args) {
+      Class typeToMock = tt.getType();
       try {
+         Module module = scope.getModule();
+         Factory mock = (Factory) builder.create(scope, typeToMock, args);
+         Instance inst = new ProxyInstance(module, mock, type, real);
          MethodInterceptorHandler handler = getMethodHandler(scope, inst);
-         Factory mock = (Factory) builder.create(inst, type, args);
          mock.setCallbacks(new Callback[] { handler });
-         return mock;
+         return inst;
       } catch (Exception e) {
          throw new IllegalStateException("Failed to mock " + type, e);
       }
