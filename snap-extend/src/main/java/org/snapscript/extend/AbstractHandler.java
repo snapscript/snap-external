@@ -9,19 +9,19 @@ import org.snapscript.core.Result;
 import org.snapscript.core.Scope;
 import org.snapscript.core.bind.FunctionBinder;
 import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.generate.TypeExtender;
 
 public abstract class AbstractHandler {
 
    protected final FunctionResolver matcher;
-   protected final TypeExtender extender;
+   protected final BridgeBuilder extender;
    protected final Instance instance;
    protected final Scope scope;
    
-   public AbstractHandler(FunctionResolver matcher, TypeExtender extender, Instance instance, Scope scope) {
+   public AbstractHandler(FunctionResolver matcher, BridgeBuilder extender, Instance instance, Scope scope) {
       this.instance = instance;
       this.extender = extender;
       this.matcher = matcher;
@@ -54,6 +54,6 @@ public abstract class AbstractHandler {
    }
    
    private Invocation getSuperCall(Class type, Method method) {
-      return extender.createSuper(scope, type, method);
+      return extender.createInvocation(scope, type, method);
    }
 }

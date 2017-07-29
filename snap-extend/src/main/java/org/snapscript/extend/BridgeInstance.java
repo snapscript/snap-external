@@ -7,7 +7,7 @@ import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.define.Instance;
 
-public class ProxyInstance implements Instance {
+public class BridgeInstance implements Instance {
 
    private final Module module;
    private final Object object;
@@ -15,7 +15,7 @@ public class ProxyInstance implements Instance {
    private final Type type;
    private final Type real;
 
-   public ProxyInstance(Module module, Object object, Type type, Type real) {
+   public BridgeInstance(Module module, Object object, Type type, Type real) {
       this.state = new MapState();
       this.object = object;
       this.module = module;
@@ -39,7 +39,7 @@ public class ProxyInstance implements Instance {
    }
    
    @Override
-   public Object getObject() {
+   public Object getBridge() {
       return object;
    }
 

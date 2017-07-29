@@ -11,17 +11,17 @@ import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.bridge.Bridge;
+import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.generate.Extension;
-import org.snapscript.core.generate.TypeExtender;
 import org.snapscript.dx.stock.ProxyBuilder;
+import org.snapscript.extend.BridgeInstance;
 import org.snapscript.extend.InstanceConverter;
-import org.snapscript.extend.ProxyInstance;
 import org.snapscript.extend.proxy.ObjectBuilder;
 
 @Bug("Fix this")
-public class AndroidExtender implements TypeExtender {
+public class AndroidExtender implements BridgeBuilder {
    
    private final Cache<Method, Invocation> invocations;
    private final ProxyBuilderGenerator generator;
@@ -31,7 +31,7 @@ public class AndroidExtender implements TypeExtender {
 
    public AndroidExtender(FunctionResolver resolver, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
-      this.generator = new ProxyBuilderGenerator(Extension.class);
+      this.generator = new ProxyBuilderGenerator(Bridge.class);
       this.builder = new ObjectBuilder(generator, resolver);
       this.resolver = resolver;
       this.type = type;
@@ -41,13 +41,13 @@ public class AndroidExtender implements TypeExtender {
    public Instance createInstance(Scope scope, Type real, Object... args) {
 
       Instance inst = getExtendedClass(scope, real, type, args);
-      Object obj = inst.getObject();
+      Object obj = inst.getBridge();
       InstanceConverter.convert(inst, obj, type);
       return inst;
    }
 
    @Override
-   public Invocation createSuper(Scope scope, Class proxy, Method method) {
+   public Invocation createInvocation(Scope scope, Class proxy, Method method) {
       Invocation invocation = invocations.fetch(method);
 
       if (invocation == null) {
@@ -62,7 +62,7 @@ public class AndroidExtender implements TypeExtender {
       try {
          Module module = scope.getModule();
          Object mock = builder.create(scope, typeToMock, args);
-         Instance inst = new ProxyInstance(module, mock, type, real);
+         Instance inst = new BridgeInstance(module, mock, type, real);
          InvocationHandler handler = getHandler(scope, inst);
          ProxyBuilder.setInvocationHandler(mock, handler);
          return inst;

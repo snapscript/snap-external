@@ -1,4 +1,4 @@
-package org.snapscript.extend.normal;
+package org.snapscript.extend.standard;
 
 import java.lang.reflect.Method;
 
@@ -7,14 +7,14 @@ import org.snapscript.cglib.proxy.MethodProxy;
 import org.snapscript.core.Bug;
 import org.snapscript.core.Scope;
 import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
-import org.snapscript.core.generate.TypeExtender;
 import org.snapscript.extend.AbstractHandler;
 
 @Bug("this is a total mess")
 public class MethodInterceptorHandler extends AbstractHandler implements MethodInterceptor  {
    
-   public MethodInterceptorHandler(FunctionResolver matcher, TypeExtender extender, Instance instance, Scope scope) {
+   public MethodInterceptorHandler(FunctionResolver matcher, BridgeBuilder extender, Instance instance, Scope scope) {
       super(matcher, extender, instance, scope);
    }
 

@@ -1,4 +1,4 @@
-package org.snapscript.extend.normal;
+package org.snapscript.extend.standard;
 
 import org.snapscript.cglib.proxy.MethodProxy;
 import org.snapscript.core.InternalStateException;

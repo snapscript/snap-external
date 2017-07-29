@@ -21,13 +21,12 @@ public class InstanceConverter {
       List<Type> types = type.getTypes();
       State state = instance.getState();
       
-      state.add(TYPE_THIS, self);
-      
       update(state, object, type);
       
       for(Type x : types) {
          update(state, object, x);
       }
+      state.add(TYPE_THIS, self);
    }
 
    private static void update(State state, Object object, Type type) {
@@ -35,11 +34,14 @@ public class InstanceConverter {
       
       for(Property prop : properties) {
          String name = prop.getName();
-         Object current = state.get(name);
          
-         if(current == null) {
-            Value value = new PropertyValue(prop, object, name);
-            state.add(name, value);
+         if(!name.equals(TYPE_THIS)) {
+            Object current = state.get(name);
+            
+            if(current == null) {
+               Value value = new PropertyValue(prop, object, name);
+               state.add(name, value);
+            }
          }
       }
    }

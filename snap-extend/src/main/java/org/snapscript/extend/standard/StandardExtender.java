@@ -1,4 +1,4 @@
-package org.snapscript.extend.normal;
+package org.snapscript.extend.standard;
 
 import java.lang.reflect.Method;
 
@@ -11,16 +11,16 @@ import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.bridge.Bridge;
+import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.generate.Extension;
-import org.snapscript.core.generate.TypeExtender;
+import org.snapscript.extend.BridgeInstance;
 import org.snapscript.extend.InstanceConverter;
-import org.snapscript.extend.ProxyInstance;
 import org.snapscript.extend.proxy.ObjectBuilder;
 
 @Bug("Fix this")
-public class NormalExtender implements TypeExtender {
+public class StandardExtender implements BridgeBuilder {
    
    private final Cache<Method, Invocation> invocations;
    private final EnhancerGenerator generator;
@@ -28,9 +28,9 @@ public class NormalExtender implements TypeExtender {
    private final ObjectBuilder builder;
    private final Type type;
 
-   public NormalExtender(FunctionResolver resolver, Type type) {
+   public StandardExtender(FunctionResolver resolver, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
-      this.generator = new EnhancerGenerator(Extension.class);
+      this.generator = new EnhancerGenerator(Bridge.class);
       this.builder = new ObjectBuilder(generator, resolver);
       this.resolver = resolver;
       this.type = type;
@@ -39,13 +39,13 @@ public class NormalExtender implements TypeExtender {
    @Override
    public Instance createInstance(Scope scope, Type real, Object... args) {
       Instance inst = getExtendedClass(scope, real, type, args);
-      Object obj = inst.getObject();
+      Object obj = inst.getBridge();
       InstanceConverter.convert(inst, obj, type);
       return inst;
    }
 
    @Override
-   public Invocation createSuper(Scope scope, Class proxy, Method method) {
+   public Invocation createInvocation(Scope scope, Class proxy, Method method) {
       Invocation invocation = invocations.fetch(method);
 
       if (invocation == null) {
@@ -56,7 +56,7 @@ public class NormalExtender implements TypeExtender {
    }
 
    private Invocation getSuperCall(Scope scope, Class proxy, Method method) {
-      return NormalProxyResolver.getSuperCall(proxy, method);
+      return StandardProxyResolver.getSuperCall(proxy, method);
    }
 
    private Instance getExtendedClass(Scope scope, Type real, Type tt, Object... args) {
@@ -64,7 +64,7 @@ public class NormalExtender implements TypeExtender {
       try {
          Module module = scope.getModule();
          Factory mock = (Factory) builder.create(scope, typeToMock, args);
-         Instance inst = new ProxyInstance(module, mock, type, real);
+         Instance inst = new BridgeInstance(module, mock, type, real);
          MethodInterceptorHandler handler = getMethodHandler(scope, inst);
          mock.setCallbacks(new Callback[] { handler });
          return inst;

@@ -1,4 +1,4 @@
-package org.snapscript.extend.normal;
+package org.snapscript.extend.standard;
 
 import java.lang.reflect.Method;
 
@@ -7,7 +7,7 @@ import org.snapscript.cglib.core.Signature;
 import org.snapscript.cglib.proxy.MethodProxy;
 import org.snapscript.core.function.Invocation;
 
-public class NormalProxyResolver {
+public class StandardProxyResolver {
 
    public static Invocation getSuperCall(Class type, Method method) {
       String name = method.getName();
