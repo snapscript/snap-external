@@ -3,6 +3,7 @@ package org.snapscript.bridge.android;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.snapscript.bridge.BridgeHandler;
 import org.snapscript.bridge.proxy.InstanceBuilder;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
@@ -21,7 +22,7 @@ public class AndroidBuilder implements BridgeBuilder {
 
    private final Cache<Method, Invocation> invocations;
    private final ProxyBuilderGenerator generator;
-   private final FunctionResolver resolver;
+   private final AndroidSupport support;
    private final InstanceBuilder builder;
    private final Type type;
 
@@ -29,7 +30,7 @@ public class AndroidBuilder implements BridgeBuilder {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
       this.generator = new ProxyBuilderGenerator(Bridge.class);
       this.builder = new InstanceBuilder(generator, resolver, type);
-      this.resolver = resolver;
+      this.support = new AndroidSupport(this, resolver);
       this.type = type;
    }
 
@@ -38,7 +39,7 @@ public class AndroidBuilder implements BridgeBuilder {
       try {
          Instance inst = builder.createInstance(scope, real, args);
          Object mock = inst.getBridge();
-         InvocationHandler handler = getHandler(scope, inst);
+         InvocationHandler handler = support.createInterceptor(scope, inst);
          ProxyBuilder.setInvocationHandler(mock, handler);
 
          return inst;
@@ -52,17 +53,9 @@ public class AndroidBuilder implements BridgeBuilder {
       Invocation invocation = invocations.fetch(method);
 
       if (invocation == null) {
-         invocation = getSuperCall(scope, proxy, method);
+         invocation = support.getSuperCall(scope, proxy, method);
          invocations.cache(method, invocation);
       }
       return invocation;
-   }
-
-   private Invocation getSuperCall(Scope scope, Class proxy, Method method) {
-      return new ProxyBuilderInvocation(method);
-   }
-
-   private InvocationHandler getHandler(Scope scope, Instance instance) {
-      return new AndroidMethodHandler(resolver, this, instance, scope);
    }
 }

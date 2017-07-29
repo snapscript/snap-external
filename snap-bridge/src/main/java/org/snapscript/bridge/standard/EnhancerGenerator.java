@@ -2,6 +2,7 @@ package org.snapscript.bridge.standard;
 
 import org.snapscript.bridge.proxy.ClassGenerator;
 import org.snapscript.cglib.proxy.Enhancer;
+import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Scope;
@@ -32,7 +33,7 @@ public class EnhancerGenerator implements ClassGenerator {
       Class[] types = collector.collect(scope);
       
       try {
-         Class[] handlers = new Class[] {MethodInterceptorHandler.class};
+         Class[] handlers = new Class[] {MethodInterceptor.class};
          Enhancer enhancer = new Enhancer();
          
          enhancer.setSuperclass(type);

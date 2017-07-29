@@ -21,7 +21,7 @@ public abstract class BridgeHandler {
    protected final Instance instance;
    protected final Scope scope;
    
-   public BridgeHandler(FunctionResolver matcher, BridgeBuilder extender, Instance instance, Scope scope) {
+   public BridgeHandler(BridgeBuilder extender, FunctionResolver matcher, Instance instance, Scope scope) {
       this.instance = instance;
       this.extender = extender;
       this.matcher = matcher;

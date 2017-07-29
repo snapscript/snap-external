@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import org.snapscript.bridge.proxy.InstanceBuilder;
 import org.snapscript.cglib.proxy.Callback;
 import org.snapscript.cglib.proxy.Factory;
+import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Bug;
@@ -21,15 +22,15 @@ public class StandardBuilder implements BridgeBuilder {
    
    private final Cache<Method, Invocation> invocations;
    private final EnhancerGenerator generator;
-   private final FunctionResolver resolver;
    private final InstanceBuilder builder;
+   private final StandardSupport support;
    private final Type type;
 
    public StandardBuilder(FunctionResolver resolver, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
       this.generator = new EnhancerGenerator(Bridge.class);
       this.builder = new InstanceBuilder(generator, resolver, type);
-      this.resolver = resolver;
+      this.support = new StandardSupport(this, resolver);
       this.type = type;
    }
 
@@ -38,7 +39,7 @@ public class StandardBuilder implements BridgeBuilder {
       try {
          Instance inst = builder.createInstance(scope, real, args);
          Factory mock = (Factory) inst.getBridge();
-         MethodInterceptorHandler handler = getMethodHandler(scope, inst);
+         MethodInterceptor handler = support.getMethodHandler(scope, inst);
          mock.setCallbacks(new Callback[] { handler });
          return inst;
       } catch (Exception e) {
@@ -51,17 +52,9 @@ public class StandardBuilder implements BridgeBuilder {
       Invocation invocation = invocations.fetch(method);
 
       if (invocation == null) {
-         invocation = getSuperCall(scope, proxy, method);
+         invocation = support.getSuperCall(scope, proxy, method);
          invocations.cache(method, invocation);
       }
       return invocation;
-   }
-
-   private Invocation getSuperCall(Scope scope, Class proxy, Method method) {
-      return StandardProxyResolver.getSuperCall(proxy, method);
-   }
-
-   private MethodInterceptorHandler getMethodHandler(Scope scope, Instance instance) {
-      return new MethodInterceptorHandler(resolver, this, instance, scope);
    }
 }
