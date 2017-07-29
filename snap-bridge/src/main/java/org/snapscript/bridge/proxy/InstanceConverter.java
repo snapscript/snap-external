@@ -1,4 +1,4 @@
-package org.snapscript.bridge;
+package org.snapscript.bridge.proxy;
 
 import static org.snapscript.core.Reserved.TYPE_THIS;
 

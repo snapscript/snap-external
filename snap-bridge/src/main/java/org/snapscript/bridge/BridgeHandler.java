@@ -14,14 +14,14 @@ import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Invocation;
 
-public abstract class AbstractHandler {
+public abstract class BridgeHandler {
 
    protected final FunctionResolver matcher;
    protected final BridgeBuilder extender;
    protected final Instance instance;
    protected final Scope scope;
    
-   public AbstractHandler(FunctionResolver matcher, BridgeBuilder extender, Instance instance, Scope scope) {
+   public BridgeHandler(FunctionResolver matcher, BridgeBuilder extender, Instance instance, Scope scope) {
       this.instance = instance;
       this.extender = extender;
       this.matcher = matcher;

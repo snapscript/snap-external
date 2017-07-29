@@ -20,15 +20,4 @@ public class StandardProxyResolver {
       MethodProxy proxy = MethodProxy.find(type, signature);
       return new MethodProxyInvocation(proxy);
    }
-   
-
-   // get the method proxy for the following call... eventually we will -> MethodCall --> SuperMethodCall & SuperMethodInvocation
-//   public static Invocation getSuperCall(Class type, String name, Class... types) {
-//      try {
-//         Method method = type.getDeclaredMethod(name, types);
-//         return getSuperCall(type, method);
-//      } catch (Exception e) {
-//         return null;
-//      }
-//   }
 }

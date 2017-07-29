@@ -7,17 +7,17 @@ import org.snapscript.core.Type;
 import org.snapscript.core.TypeLoader;
 import org.snapscript.core.bind.FunctionResolver;
 
-public class ObjectBuilder {
+public class ObjectGenerator {
    
    private final ConstructorResolver resolver;
    private final ClassGenerator generator;
    
-   public ObjectBuilder(ClassGenerator generator, FunctionResolver resolver) {
+   public ObjectGenerator(ClassGenerator generator, FunctionResolver resolver) {
       this.resolver = new ConstructorResolver(resolver);
       this.generator = generator;
    }
 
-   public Object create(Scope scope, Class type, Object... arguments) throws Exception {
+   public Object createObject(Scope scope, Class type, Object... arguments) throws Exception {
       Class proxy = generator.generate(scope, type);
       Module module = scope.getModule();
       Context context = module.getContext();
