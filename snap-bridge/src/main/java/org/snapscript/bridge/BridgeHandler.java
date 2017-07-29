@@ -4,56 +4,63 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.Reserved;
+import org.snapscript.core.Module;
 import org.snapscript.core.Result;
 import org.snapscript.core.Scope;
+import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionBinder;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.bridge.BridgeBuilder;
+import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.tree.define.ThisScopeBinder;
 
 public abstract class BridgeHandler {
 
    protected final FunctionResolver matcher;
+   protected final ThisScopeBinder binder;
    protected final BridgeBuilder extender;
    protected final Instance instance;
-   protected final Scope scope;
    
-   public BridgeHandler(BridgeBuilder extender, FunctionResolver matcher, Instance instance, Scope scope) {
+   public BridgeHandler(BridgeBuilder extender, FunctionResolver matcher, Instance instance) {
+      this.binder = new ThisScopeBinder();
       this.instance = instance;
       this.extender = extender;
       this.matcher = matcher;
-      this.scope = scope;
    }
 
-   public Object invoke(Object obj, Method method, Object[] args) throws Throwable {
-      Object o = instance.getState().get(Reserved.TYPE_THIS).getValue();
-      Instance real = (Instance) o;
+   public Object invoke(Object object, Method method, Object[] list) throws Throwable {
+      String name = method.getName();
+      Class real = object.getClass();
+      Scope scope = binder.bind(instance, instance);
       
       if(method.getName().equals("extract") && method.getReturnType().equals(Object.class) && method.getParameterTypes().length == 0) {
-         return real;
+         return scope;
       }
-      String name = method.getName();
-      Function func = matcher.resolve(real.getType(), name, args);
+      Type type = scope.getType();
+      Module module = scope.getModule();
+      Context context = module.getContext();
+      Function function = matcher.resolve(type, name, list); // this is saying if 
       
-      if (func != null && func.getSignature() != null && func.getSignature().getSource() != null && func.getSignature().getSource().equals(method)) {
-         return getSuperCall(obj.getClass(), method).invoke(real, obj, args).getValue();
+      if (function != null && function.getSignature() != null && function.getSignature().getSource() != null && function.getSignature().getSource().equals(method)) {
+         return getSuperCall(real, method).invoke(scope, object, list).getValue();
       }
-      FunctionBinder binder = scope.getModule().getContext().getBinder();
-      Callable<Result> call = binder.bind(real, real, name, args);
+      FunctionBinder binder = context.getBinder();
+      Callable<Result> call = binder.bind(scope, scope, name, list);
+      
       if (call == null) {
-         return getSuperCall(obj.getClass(), method).invoke(real, obj, args).getValue(); // here the ScopeDispatcher needs to say SuperInstance::getObject --> MethodProxy::ivokeSuper
+         return getSuperCall(real, method).invoke(scope, object, list).getValue(); // here the ScopeDispatcher needs to say SuperInstance::getObject --> MethodProxy::ivokeSuper
       }
-      Context context = scope.getModule().getContext();
+      ProxyWrapper wrapper = context.getWrapper();
       Result result = call.call();
-      Object res = result.getValue();
+      Object value = result.getValue();
       
-      return context.getWrapper().fromProxy(res);
+      return wrapper.fromProxy(value);
    }
    
    private Invocation getSuperCall(Class type, Method method) {
-      return extender.createInvocation(scope, type, method);
+      return extender.superInvocation(instance, type, method);
    }
 }

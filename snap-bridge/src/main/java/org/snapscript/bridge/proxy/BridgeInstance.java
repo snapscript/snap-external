@@ -1,4 +1,4 @@
-package org.snapscript.bridge;
+package org.snapscript.bridge.proxy;
 
 import org.snapscript.core.MapState;
 import org.snapscript.core.Model;

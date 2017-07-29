@@ -12,11 +12,11 @@ import org.snapscript.core.define.Instance;
 import org.snapscript.core.property.Property;
 import org.snapscript.core.property.PropertyValue;
 
-public class InstanceConverter {
+public class BridgeInstanceConverter {
    
    private final Type type;
    
-   public InstanceConverter(Type type) {
+   public BridgeInstanceConverter(Type type) {
       this.type = type;
    }
 

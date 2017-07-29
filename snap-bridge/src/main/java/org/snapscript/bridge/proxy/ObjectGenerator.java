@@ -17,7 +17,7 @@ public class ObjectGenerator {
       this.generator = generator;
    }
 
-   public Object createObject(Scope scope, Class type, Object... arguments) throws Exception {
+   public Object generate(Scope scope, Class type, Object... arguments) throws Exception {
       Class proxy = generator.generate(scope, type);
       Module module = scope.getModule();
       Context context = module.getContext();
