@@ -1,6 +1,6 @@
 package org.snapscript.bridge.standard;
 
-import org.snapscript.bridge.proxy.ClassGenerator;
+import org.snapscript.bridge.generate.ClassGenerator;
 import org.snapscript.cglib.proxy.Enhancer;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.common.Cache;

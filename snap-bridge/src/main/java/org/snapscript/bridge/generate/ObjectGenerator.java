@@ -1,4 +1,4 @@
-package org.snapscript.bridge.proxy;
+package org.snapscript.bridge.generate;
 
 import org.snapscript.core.Context;
 import org.snapscript.core.Module;

@@ -2,7 +2,7 @@ package org.snapscript.bridge.standard;
 
 import java.lang.reflect.Method;
 
-import org.snapscript.bridge.proxy.BridgeInstanceBuilder;
+import org.snapscript.bridge.generate.BridgeInstanceBuilder;
 import org.snapscript.cglib.proxy.Callback;
 import org.snapscript.cglib.proxy.Factory;
 import org.snapscript.cglib.proxy.MethodInterceptor;

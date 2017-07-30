@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import org.snapscript.bridge.BridgeHandler;
-import org.snapscript.bridge.proxy.BridgeInstanceBuilder;
+import org.snapscript.bridge.generate.BridgeInstanceBuilder;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Bug;

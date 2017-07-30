@@ -1,6 +1,6 @@
 package org.snapscript.bridge.android;
 
-import org.snapscript.bridge.proxy.ClassGenerator;
+import org.snapscript.bridge.generate.ClassGenerator;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Scope;
