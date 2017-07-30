@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import org.snapscript.bridge.BridgeHandler;
+import org.snapscript.core.Context;
+import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.bridge.BridgeBuilder;
@@ -25,13 +27,9 @@ public class AndroidAdapterBuilder {
    }
 
    public InvocationHandler createHandler(Scope scope, Instance instance) {
-      return new InvocationInterceptor(builder, resolver, instance);
-   }
-   
-   private static class InvocationInterceptor extends BridgeHandler implements InvocationHandler  {
-
-      public InvocationInterceptor(BridgeBuilder builder, FunctionResolver resolver, Instance instance) {
-         super(builder, resolver, instance);
-      }
+      Module module = scope.getModule();
+      Context context = module.getContext();
+      
+      return new BridgeHandler(builder, resolver, context, instance);
    }
 }

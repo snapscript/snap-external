@@ -3,11 +3,9 @@ package org.snapscript.bridge.android;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.snapscript.bridge.BridgeHandler;
 import org.snapscript.bridge.generate.BridgeInstanceBuilder;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
-import org.snapscript.core.Bug;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;

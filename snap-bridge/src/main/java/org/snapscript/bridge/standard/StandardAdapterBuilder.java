@@ -7,6 +7,8 @@ import org.snapscript.bridge.BridgeHandler;
 import org.snapscript.cglib.core.Signature;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.cglib.proxy.MethodProxy;
+import org.snapscript.core.Context;
+import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.bridge.BridgeBuilder;
@@ -50,13 +52,16 @@ public class StandardAdapterBuilder {
    }
 
    public MethodInterceptor createInterceptor(Scope scope, Instance instance) {
-      return new InvocationInterceptor(builder, resolver, instance);
+      Module module = scope.getModule();
+      Context context = module.getContext();
+      
+      return new InvocationInterceptor(builder, resolver, context, instance);
    }
    
    private static class InvocationInterceptor extends BridgeHandler implements MethodInterceptor  {
       
-      public InvocationInterceptor(BridgeBuilder builder, FunctionResolver resolver, Instance instance) {
-         super(builder, resolver, instance);
+      public InvocationInterceptor(BridgeBuilder builder, FunctionResolver resolver, Context context, Instance instance) {
+         super(builder, resolver, context, instance);
       }
 
       @Override
