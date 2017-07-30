@@ -41,7 +41,7 @@ public class BridgeHandler implements InvocationHandler {
       Class owner = method.getDeclaringClass();
       Scope scope = binder.bind(instance, instance);
       
-      if(owner == Bridge.class) {
+      if(owner != Bridge.class) {
          Invocation invocation = bind(object, method, list);
          Result result = invocation.invoke(scope, object, list);
          ProxyWrapper wrapper = context.getWrapper();
