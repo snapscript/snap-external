@@ -58,6 +58,42 @@ public class ExtendJavaClassTest extends TestCase {
    "bag.put('b', 'B');\n"+
    "assert bag.get('a') == 'A';\n";
    
+   private static final String SOURCE_4 =
+   "class BufferStream extends OutputStream {\n"+
+   "   const buffer: ByteArrayOutputStream;\n"+
+   "   new() {\n"+
+   "      this.buffer = new ByteArrayOutputStream();\n"+
+   "   }\n"+
+   "   override write(octet: Integer){\n"+
+   "      write([octet]);\n"+
+   "   }\n"+
+   "   override write(array: Byte[], off: Integer, size: Integer) {\n"+
+   "      buffer.write(array, off, size);\n"+
+   "   }\n"+
+   "   override flush() {\n"+
+   "      buffer.flush();\n"+
+   "   }\n"+
+   "   override close() {\n"+
+   "      buffer.close();\n"+
+   "   }\n"+
+   "   override toString() {\n"+
+   "      return buffer.toString();\n"+
+   "   }\n"+
+   "}\n"+
+   "\n"+
+   "var buffer = new BufferStream();\n"+
+   "\n"+
+   "buffer.write(10);\n"+   
+   "buffer.write('hello world'.getBytes());\n"+
+   "buffer.write(10);\n"+
+   "buffer.write('next'.getBytes());\n"+
+   "\n"+
+   "var text = buffer.toString();\n"+
+   "\n"+
+   "println(text);\n"+
+   "\n"+
+   "assert text == '\nhello world\nnext';\n";   
+   
    public void testExtendJavaClass() throws Exception {
       Compiler compiler = ClassPathCompilerBuilder.createCompiler();
       System.err.println(SOURCE_1);
@@ -76,6 +112,13 @@ public class ExtendJavaClassTest extends TestCase {
       Compiler compiler = ClassPathCompilerBuilder.createCompiler();
       System.err.println(SOURCE_3);
       Executable executable = compiler.compile(SOURCE_3);
+      executable.execute();
+   }
+   
+   public void testExtendWithTypeConstraints() throws Exception {
+      Compiler compiler = ClassPathCompilerBuilder.createCompiler();
+      System.err.println(SOURCE_4);
+      Executable executable = compiler.compile(SOURCE_4);
       executable.execute();
    }
 }
