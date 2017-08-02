@@ -115,6 +115,3 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
         e.end_method();
     }
 }
-
-
-

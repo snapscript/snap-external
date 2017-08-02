@@ -112,5 +112,3 @@ class CallbackInfo
         throw new IllegalStateException("Unknown callback type " + callbackType);
     }
 }
-    
-

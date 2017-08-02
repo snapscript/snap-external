@@ -59,4 +59,3 @@ public class AddInitTransformer extends ClassEmitterTransformer {
         return emitter;
     }
 }
-

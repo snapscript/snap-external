@@ -27,7 +27,7 @@ public class BridgeInstanceBuilder {
    private Instance createBridge(Scope scope, Type real, Object... arguments) throws Exception {
       Class base = type.getType();
       Module module = scope.getModule();
-      Object object = generator.generate(scope, base, arguments);
+      Object object = generator.generate(scope, real, base, arguments);
       
       return new BridgeInstance(module, object, type, real);
       

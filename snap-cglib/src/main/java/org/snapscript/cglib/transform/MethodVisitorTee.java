@@ -184,4 +184,3 @@ public class MethodVisitorTee extends MethodVisitor {
                                                 mv2.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible));
     }
 }
-

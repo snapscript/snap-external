@@ -92,8 +92,26 @@ public class ExtendJavaClassTest extends TestCase {
    "\n"+
    "println(text);\n"+
    "\n"+
-   "assert text == '\nhello world\nnext';\n";   
+   "assert text == '\nhello world\nnext';\n";  
    
+   private static final String SOURCE_5 =
+   "import swing.JPanel;\n"+
+   "import awt.Graphics;\n"+
+   "class UpdatablePanel extends JPanel {\n"+
+   "   const foo;\n"+
+   "   new(foo){\n"+
+   "      this.foo = foo;\n"+
+   "   }\n"+
+   "   override update(g: Graphics) {\n"+
+   "      super.update(g);\n"+
+   "   }\n"+
+   "   override paint(g: Graphics) {\n"+
+   "      super.paint(g);\n"+
+   "   }\n"+
+   "}\n"+
+   "var panel = new UpdatablePanel('str');\n"+
+   "println(panel);\n";
+         
    public void testExtendJavaClass() throws Exception {
       Compiler compiler = ClassPathCompilerBuilder.createCompiler();
       System.err.println(SOURCE_1);
@@ -119,6 +137,13 @@ public class ExtendJavaClassTest extends TestCase {
       Compiler compiler = ClassPathCompilerBuilder.createCompiler();
       System.err.println(SOURCE_4);
       Executable executable = compiler.compile(SOURCE_4);
+      executable.execute();
+   }
+   
+   public void testExtendSwingPanel() throws Exception {
+      Compiler compiler = ClassPathCompilerBuilder.createCompiler();
+      System.err.println(SOURCE_5);
+      Executable executable = compiler.compile(SOURCE_5);
       executable.execute();
    }
 }

@@ -1,37 +1,45 @@
 package org.snapscript.bridge.android;
 
 import org.snapscript.bridge.generate.ClassGenerator;
-import org.snapscript.common.Cache;
-import org.snapscript.common.CopyOnWriteCache;
+import org.snapscript.core.Any;
+import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Scope;
+import org.snapscript.core.Type;
+import org.snapscript.core.TypeCache;
+import org.snapscript.core.convert.InterfaceCollector;
 import org.snapscript.dx.stock.ProxyBuilder;
 
 public class ProxyBuilderGenerator implements ClassGenerator {
 
-   private final Cache<Class, Class> cache;
-   private final Class[] interfaces;
+   private final InterfaceCollector collector;
+   private final TypeCache<Class> cache;
+   private final ClassLoader loader;
    
    public ProxyBuilderGenerator(Class... interfaces) {
-      this.cache = new CopyOnWriteCache<Class, Class>();
-      this.interfaces = interfaces;
+      this.collector = new InterfaceCollector(interfaces);
+      this.loader = new ContextClassLoader(Any.class);
+      this.cache = new TypeCache<Class>();
    }
    
    @Override
-   public Class generate(Scope scope, Class type) {
+   public Class generate(Scope scope, Type type, Class base) {
       Class proxy = cache.fetch(type);
       
       if(proxy == null) {
-         proxy = create(scope, type);
+         proxy = create(scope, type, base);
          cache.cache(type, proxy);
       }
       return proxy;
    }
    
-   private Class create(Scope scope, Class type) {
+   private Class create(Scope scope, Type type, Class base) {
       try {
-         return ProxyBuilder.forClass(type).implementing(interfaces).buildProxyClass();
+         Class[] interfaces = collector.collect(type);
+         ProxyBuilder builder = ProxyBuilder.forClass(base);
+         
+         return builder.implementing(interfaces).parentClassLoader(loader).buildProxyClass();
       }catch(Exception e) {
-         throw new IllegalStateException("Could not create proxy for " + type, e);
+         throw new IllegalStateException("Type '" + type + "' could not extend "+ base, e);
       }
    }
 }

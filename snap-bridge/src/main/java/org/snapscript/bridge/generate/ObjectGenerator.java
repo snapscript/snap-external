@@ -17,12 +17,12 @@ public class ObjectGenerator {
       this.generator = generator;
    }
 
-   public Object generate(Scope scope, Class type, Object... arguments) throws Exception {
-      Class proxy = generator.generate(scope, type);
+   public Object generate(Scope scope, Type real, Class base, Object... arguments) throws Exception {
+      Class proxy = generator.generate(scope, real, base);
       Module module = scope.getModule();
       Context context = module.getContext();
       TypeLoader loader = context.getLoader();
-      Type match = loader.loadType(type);
+      Type match = loader.loadType(base);
       ConstructorArguments data = resolver.findConstructor(scope, match, arguments);
       Object[] converted = data.getArguments();
       Class[] types = data.getTypes();

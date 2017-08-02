@@ -50,4 +50,3 @@ public class FieldVisitorTee extends FieldVisitor {
                                                 fv2.visitTypeAnnotation(typeRef, typePath, desc, visible));
     }
 }
-

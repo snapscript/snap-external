@@ -72,5 +72,4 @@ public class CollectionUtils {
         }
         return indexes;
     }
-}    
-    
+}

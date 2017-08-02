@@ -58,4 +58,3 @@ public class UndeclaredThrowableStrategy extends DefaultGeneratorStrategy {
         return new TransformingClassGenerator(cg, tr);
     }
 }
-

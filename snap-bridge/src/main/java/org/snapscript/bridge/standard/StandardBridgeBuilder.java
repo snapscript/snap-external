@@ -8,7 +8,6 @@ import org.snapscript.cglib.proxy.Factory;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
-import org.snapscript.core.Bug;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;

@@ -18,4 +18,3 @@ package org.snapscript.cglib.core;
 public interface Predicate {
     boolean evaluate(Object arg);
 }
-
