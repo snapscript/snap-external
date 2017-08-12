@@ -11,7 +11,9 @@ public class ExtendClassReferenceStaticTest extends TestCase {
    "import swing.JFrame;\n"+
    "class GameFrame extends JFrame {\n"+
    "   public static const BLAH = \"ss\";\n"+
+   "   public static var playbackFormat: Integer=3411;\n"+
    "   new(a,b){\n"+
+   "     println(BLAH + ':' + a + ':' + playbackFormat);\n"+
    "   }\n"+
    "\n"+
    "   dump(){\n"+
