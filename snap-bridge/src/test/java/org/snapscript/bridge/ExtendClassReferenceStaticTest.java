@@ -1,0 +1,31 @@
+package org.snapscript.bridge;
+
+import junit.framework.TestCase;
+
+import org.snapscript.compile.Compiler;
+import org.snapscript.compile.Executable;
+
+public class ExtendClassReferenceStaticTest extends TestCase {
+
+   private static final String SOURCE_1 =
+   "import swing.JFrame;\n"+
+   "class GameFrame extends JFrame {\n"+
+   "   public static const BLAH = \"ss\";\n"+
+   "   new(a,b){\n"+
+   "   }\n"+
+   "\n"+
+   "   dump(){\n"+
+   "      println(\"a=${a} b=${b}\");\n"+
+   "   }\n"+
+   "}\n"+
+   "var y = new GameFrame(1, 2);\n"+
+   "println(y);\n";
+   
+   public void testConstructorStaticReference() throws Exception{
+      Compiler compiler = ClassPathCompilerBuilder.createCompiler();
+      System.err.println(SOURCE_1);
+      Executable executable = compiler.compile(SOURCE_1);
+      executable.execute();
+   }
+         
+}

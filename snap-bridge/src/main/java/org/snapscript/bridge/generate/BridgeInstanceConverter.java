@@ -37,14 +37,14 @@ public class BridgeInstanceConverter {
    private void update(State state, Object object, Type type) {
       List<Property> properties = type.getProperties();
       
-      for(Property prop : properties) {
-         String name = prop.getName();
-         
+      for(Property property : properties) {
+         String name = property.getName();
+
          if(!name.equals(TYPE_THIS)) {
             Object current = state.get(name);
             
             if(current == null) {
-               Value value = new PropertyValue(prop, object, name);
+               Value value = new PropertyValue(property, object, name);
                state.add(name, value);
             }
          }

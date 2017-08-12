@@ -3,6 +3,7 @@ package org.snapscript.bridge.generate;
 import org.snapscript.core.MapState;
 import org.snapscript.core.Model;
 import org.snapscript.core.Module;
+import org.snapscript.core.Scope;
 import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.define.Instance;
@@ -15,8 +16,8 @@ public class BridgeInstance implements Instance {
    private final Type type;
    private final Type real;
 
-   public BridgeInstance(Module module, Object object, Type type, Type real) {
-      this.state = new MapState();
+   public BridgeInstance(Module module, Scope scope, Object object, Type type, Type real) {
+      this.state = new MapState(null, scope);
       this.object = object;
       this.module = module;
       this.type = type;

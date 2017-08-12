@@ -28,8 +28,9 @@ public class BridgeInstanceBuilder {
       Class base = type.getType();
       Module module = scope.getModule();
       Object object = generator.generate(scope, real, base, arguments);
+      Scope outer = real.getScope();
       
-      return new BridgeInstance(module, object, type, real);
+      return new BridgeInstance(module, outer, object, type, real);
       
    }
 }

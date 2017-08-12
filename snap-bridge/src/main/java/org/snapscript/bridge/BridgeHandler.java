@@ -20,12 +20,12 @@ import org.snapscript.tree.define.ThisScopeBinder;
 
 public class BridgeHandler implements InvocationHandler {
 
-   private final MethodComparator comparator;
-   private final FunctionResolver resolver;
-   private final ThisScopeBinder binder;
-   private final BridgeBuilder builder;
-   private final Instance instance;
-   private final Context context;
+   protected final MethodComparator comparator;
+   protected final FunctionResolver resolver;
+   protected final ThisScopeBinder binder;
+   protected final BridgeBuilder builder;
+   protected final Instance instance;
+   protected final Context context;
    
    public BridgeHandler(BridgeBuilder builder, FunctionResolver resolver, Context context, Instance instance) {
       this.comparator = new MethodComparator();
@@ -47,7 +47,7 @@ public class BridgeHandler implements InvocationHandler {
          ProxyWrapper wrapper = context.getWrapper();
          Object value = result.getValue();
          
-         return wrapper.fromProxy(value);
+         return wrapper.toProxy(value);
       }
       return scope;
    }
