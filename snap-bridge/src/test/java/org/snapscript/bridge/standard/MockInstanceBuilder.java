@@ -1,4 +1,4 @@
-package org.snapscript.bridge;
+package org.snapscript.bridge.standard;
 
 import org.snapscript.core.Context;
 import org.snapscript.core.ContextModule;
@@ -12,7 +12,7 @@ import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.bridge.PlatformBridgeProvider;
 import org.snapscript.core.define.Instance;
 
-public class THING {
+public class MockInstanceBuilder {
    public static void createInstance(Context context) {
       Model model = new EmptyModel();
       Path path = new Path("/foo");

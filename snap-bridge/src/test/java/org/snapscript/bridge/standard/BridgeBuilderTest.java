@@ -2,7 +2,6 @@ package org.snapscript.bridge.standard;
 
 import junit.framework.TestCase;
 
-import org.snapscript.bridge.THING;
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
 import org.snapscript.core.Context;
@@ -25,7 +24,7 @@ public class BridgeBuilderTest extends TestCase {
       Context context = new StoreContext(store);
       
       createInstance(context);
-      THING.createInstance(context);
+      MockInstanceBuilder.createInstance(context);
    }
    
    public void createInstance(Context context) {
