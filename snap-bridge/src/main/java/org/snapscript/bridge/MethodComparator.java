@@ -10,8 +10,19 @@ public class MethodComparator {
    public MethodComparator() {
       super();
    }
+   
+   public boolean isAbstract(Function function) {
+      if(function != null) {
+         Signature signature = function.getSignature();
+         
+         if(signature != null) {
+            return false;
+         }
+      }
+      return true;
+   }
 
-   public boolean isEqual(Method method, Function function) {
+   public boolean isEqual(Function function, Method method) {
       if(function != null) {
          Signature signature = function.getSignature();
          Object source = signature.getSource();

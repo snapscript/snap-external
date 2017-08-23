@@ -4,7 +4,6 @@ import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
-import org.snapscript.core.define.Instance;
 
 public class BridgeInstanceBuilder {
 
@@ -18,19 +17,19 @@ public class BridgeInstanceBuilder {
       this.type = type;
    }
    
-   public Instance createInstance(Scope scope, Type real, Object... arguments) throws Exception {
-      Instance instance = createBridge(scope, real, arguments);
+   public BridgeInstance createInstance(Scope scope, Type real, Object... arguments) throws Exception {
+      BridgeInstance instance = createBridge(scope, real, arguments);
       converter.convert(instance);
       return instance;
    }
    
-   private Instance createBridge(Scope scope, Type real, Object... arguments) throws Exception {
+   private BridgeInstance createBridge(Scope scope, Type real, Object... arguments) throws Exception {
       Class base = type.getType();
-      Module module = scope.getModule();
-      Object object = generator.generate(scope, real, base, arguments);
       Scope outer = real.getScope();
+      Module module = scope.getModule();
+      BridgeHolder holder = generator.generate(scope, real, base, arguments);
       
-      return new BridgeInstance(module, outer, object, type, real);
+      return new BridgeInstance(holder, module, outer, real);
       
    }
 }

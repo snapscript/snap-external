@@ -8,9 +8,7 @@ import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
 import org.snapscript.core.ValueType;
-import org.snapscript.core.define.Instance;
 import org.snapscript.core.property.Property;
-import org.snapscript.core.property.PropertyValue;
 
 public class BridgeInstanceConverter {
    
@@ -20,21 +18,20 @@ public class BridgeInstanceConverter {
       this.type = type;
    }
 
-   public void convert(Instance instance) {
+   public void convert(BridgeInstance instance) {
       Value self = ValueType.getReference(instance);
       List<Type> types = type.getTypes();
       State state = instance.getState();
-      Object bridge = instance.getBridge();
       
-      update(state, bridge, type);
+      update(instance, state, type);
       
       for(Type type : types) {
-         update(state, bridge, type);
+         update(instance, state, type);
       }
       state.add(TYPE_THIS, self);
    }
 
-   private void update(State state, Object object, Type type) {
+   private void update(BridgeInstance instance, State state, Type type) {
       List<Property> properties = type.getProperties();
       
       for(Property property : properties) {
@@ -44,7 +41,7 @@ public class BridgeInstanceConverter {
             Object current = state.get(name);
             
             if(current == null) {
-               Value value = new PropertyValue(property, object, name);
+               Value value = new BridgeValue(instance, property, name);
                state.add(name, value);
             }
          }

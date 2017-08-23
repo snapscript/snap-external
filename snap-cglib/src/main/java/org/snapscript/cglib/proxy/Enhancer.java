@@ -21,12 +21,41 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.snapscript.asm.ClassVisitor;
 import org.snapscript.asm.Label;
 import org.snapscript.asm.Type;
-import org.snapscript.cglib.core.*;
+import org.snapscript.cglib.core.AbstractClassGenerator;
+import org.snapscript.cglib.core.ClassEmitter;
+import org.snapscript.cglib.core.CodeEmitter;
+import org.snapscript.cglib.core.CodeGenerationException;
+import org.snapscript.cglib.core.CollectionUtils;
+import org.snapscript.cglib.core.Constants;
+import org.snapscript.cglib.core.DuplicatesPredicate;
+import org.snapscript.cglib.core.EmitUtils;
+import org.snapscript.cglib.core.KeyFactory;
+import org.snapscript.cglib.core.Local;
+import org.snapscript.cglib.core.MethodInfo;
+import org.snapscript.cglib.core.MethodInfoTransformer;
+import org.snapscript.cglib.core.MethodWrapper;
+import org.snapscript.cglib.core.ObjectSwitchCallback;
+import org.snapscript.cglib.core.ProcessSwitchCallback;
+import org.snapscript.cglib.core.ReflectUtils;
+import org.snapscript.cglib.core.RejectModifierPredicate;
+import org.snapscript.cglib.core.Signature;
+import org.snapscript.cglib.core.Transformer;
+import org.snapscript.cglib.core.TypeUtils;
+import org.snapscript.cglib.core.VisibilityPredicate;
+import org.snapscript.cglib.core.WeakCacheKey;
 
 /**
  * Generates dynamic subclasses to enable method interception. This
@@ -149,6 +178,7 @@ public class Enhancer extends AbstractClassGenerator
                                   Long serialVersionUID);
     }
 
+    private Class[] beanInterfaces;
     private Class[] interfaces;
     private CallbackFilter filter;
     private Callback[] callbacks;
@@ -192,6 +222,10 @@ public class Enhancer extends AbstractClassGenerator
             this.superclass = superclass;
         }
     }
+    
+    public void setBeanInterfaces(Class... beanInterfaces) {
+       this.beanInterfaces = beanInterfaces;
+    }
 
     /**
      * Set the interfaces to implement. The <code>Factory</code> interface will
@@ -199,7 +233,7 @@ public class Enhancer extends AbstractClassGenerator
      * @param interfaces array of interfaces to implement, or null
      * @see Factory
      */
-    public void setInterfaces(Class[] interfaces) {
+    public void setInterfaces(Class... interfaces) {
         this.interfaces = interfaces;
     }
 
@@ -535,7 +569,7 @@ public class Enhancer extends AbstractClassGenerator
         getMethods(superclass, interfaces, methods, null, null);
     }
 
-    private static void getMethods(Class superclass, Class[] interfaces, List methods, List interfaceMethods, Set forcePublic)
+    public static void getMethods(Class superclass, Class[] interfaces, List methods, List interfaceMethods, Set forcePublic)
     {
         ReflectUtils.addAllMethods(superclass, methods);
         List target = (interfaceMethods != null) ? interfaceMethods : methods;
@@ -590,14 +624,15 @@ public class Enhancer extends AbstractClassGenerator
         });
 
         ClassEmitter e = new ClassEmitter(v);
+        Class[] combined = determineImplementInterfaces();
         if (currentData == null) {
-        e.begin_class(Constants.V1_2,
+           e.begin_class(Constants.V1_2,
                       Constants.ACC_PUBLIC,
                       getClassName(),
                       Type.getType(sc),
                       (useFactory ?
-                       TypeUtils.add(TypeUtils.getTypes(interfaces), FACTORY) :
-                       TypeUtils.getTypes(interfaces)),
+                       TypeUtils.add(TypeUtils.getTypes(combined), FACTORY) :
+                       TypeUtils.getTypes(combined)),
                       Constants.SOURCE_FILE);
         } else {
             e.begin_class(Constants.V1_2,
@@ -646,8 +681,83 @@ public class Enhancer extends AbstractClassGenerator
             emitGetCallbacks(e);
             emitSetCallbacks(e);
         }
-
+        generateBeanProperties(e);
         e.end_class();
+    }
+    
+    private void generateBeanProperties(ClassEmitter e) {
+       if(beanInterfaces != null) {
+          for(Class beanInterface : beanInterfaces) {
+             Method[] methods = beanInterface.getDeclaredMethods();
+             String[] names = new String[methods.length / 2];
+             Class[] types = new Class[methods.length / 2];
+             int index = 0;
+             
+             for(Method method : methods) {
+                Class returnType = method.getReturnType();
+                String property = determinePropertyName(method);
+                
+                if(returnType != void.class) {
+                   names[index] = property;
+                   types[index++] = returnType;
+                }
+             }
+             if(index != types.length) {
+                throw new IllegalStateException("Properties did not match in " + beanInterfaces);
+             }
+             EmitUtils.add_properties(e, names, TypeUtils.getTypes(types));
+          }
+       }
+    }
+    
+    private String determinePropertyName(Method method) {
+       String name = method.getName();
+       Class returnType = method.getReturnType();
+       Class[] parameterTypes = method.getParameterTypes();
+       
+       if(name.startsWith("get")) {
+          if(returnType == void.class) {
+             throw new IllegalStateException("Get method '" + method + "' must return a type");
+          }
+          if(parameterTypes.length != 0) {
+             throw new IllegalStateException("Get method '" + method + "' must have no parameters");
+          }
+          return name.substring(3);
+       }
+       if(name.startsWith("set")) {
+          if(returnType != void.class) {
+             throw new IllegalStateException("Set method '" + method + "' must not return a type");
+          }
+          if(parameterTypes.length != 1) {
+             throw new IllegalStateException("Set method '" + method + "' must have a single parameter");
+          }
+          return name.substring(3);
+       }
+       if(name.startsWith("is")) {
+          if(returnType != boolean.class && returnType != Boolean.class) {
+             throw new IllegalStateException("Get method '" + method + "' must return a boolean");
+          }
+          if(parameterTypes.length != 0) {
+             throw new IllegalStateException("Get method '" + method + "' must have no parameters");
+          }
+          return name.substring(2);
+       }
+       throw new IllegalStateException("Method '" + method+ "' does not represent a property");
+    }
+    
+    private Class[] determineImplementInterfaces() {
+       if(interfaces == null) {
+          return beanInterfaces;
+       } 
+       if(beanInterfaces == null) {
+          return interfaces;
+       }
+       Class[] combined = new Class[interfaces.length + beanInterfaces.length];
+       
+       System.arraycopy(interfaces, 0, combined, 0, interfaces.length);
+       System.arraycopy(beanInterfaces, 0, combined, interfaces.length, beanInterfaces.length);
+       
+       return combined;
     }
 
     /**
@@ -660,7 +770,7 @@ public class Enhancer extends AbstractClassGenerator
      * @param constructors the list of all declared constructors from the superclass
      * @throws IllegalArgumentException if there are no non-private constructors
      */
-    protected void filterConstructors(Class sc, List constructors) {
+    public static void filterConstructors(Class sc, List constructors) {
         CollectionUtils.filter(constructors, new VisibilityPredicate(sc, true));
         if (constructors.size() == 0)
             throw new IllegalArgumentException("No visible constructors in " + sc);

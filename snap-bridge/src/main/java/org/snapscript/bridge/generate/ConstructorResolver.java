@@ -22,7 +22,7 @@ public class ConstructorResolver {
       this.resolver = resolver;
    }
 
-   public ConstructorArguments findConstructor(Scope scope, Type type, Object... args) {
+   public ConstructorArguments resolve(Scope scope, Type type, Object... args) {
       try {
          Function function = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
          Signature signature = function.getSignature();

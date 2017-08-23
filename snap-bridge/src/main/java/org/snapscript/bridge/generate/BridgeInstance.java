@@ -6,22 +6,30 @@ import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.State;
 import org.snapscript.core.Type;
+import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.define.Instance;
 
 public class BridgeInstance implements Instance {
 
+   private final BridgeHolder holder;
    private final Module module;
-   private final Object object;
    private final State state;
-   private final Type type;
    private final Type real;
 
-   public BridgeInstance(Module module, Scope scope, Object object, Type type, Type real) {
+   public BridgeInstance(BridgeHolder holder, Module module, Scope scope, Type real) {
       this.state = new MapState(null, scope);
-      this.object = object;
+      this.holder = holder;
       this.module = module;
-      this.type = type;
       this.real = real;
+   }
+   
+   public BridgeHolder getHolder() {
+      return holder;
+   }
+   
+   @Override
+   public Bridge getBridge() {
+      return holder.getBridge();
    }
 
    @Override
@@ -37,11 +45,6 @@ public class BridgeInstance implements Instance {
    @Override
    public Instance getSuper() {
       return this;
-   }
-   
-   @Override
-   public Object getBridge() {
-      return object;
    }
 
    @Override
@@ -66,6 +69,6 @@ public class BridgeInstance implements Instance {
 
    @Override
    public Type getHandle() {
-      return type;
+      return real;
    }
 }

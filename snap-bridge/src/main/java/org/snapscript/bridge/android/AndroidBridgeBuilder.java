@@ -3,46 +3,57 @@ package org.snapscript.bridge.android;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.snapscript.bridge.InvocationRouter;
+import org.snapscript.bridge.ThreadLocalHandler;
+import org.snapscript.bridge.generate.BridgeInstance;
 import org.snapscript.bridge.generate.BridgeInstanceBuilder;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
-import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.dx.stock.ProxyBuilder;
 
 public class AndroidBridgeBuilder implements BridgeBuilder {
 
    private final Cache<Method, Invocation> invocations;
    private final ProxyBuilderGenerator generator;
-   private final AndroidAdapterBuilder support;
    private final BridgeInstanceBuilder builder;
+   private final ProxyBuilderWrapper wrapper;
+   private final InvocationHandler handler;
+   private final InvocationRouter router;
+   private final ThreadLocal local;
    private final Type type;
 
    public AndroidBridgeBuilder(FunctionResolver resolver, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
-      this.generator = new ProxyBuilderGenerator(Bridge.class);
+      this.router = new InvocationRouter(this, resolver);
+      this.local = new ThreadLocal<BridgeInstance>();
+      this.handler = new ThreadLocalHandler(local, router);
+      this.generator = new ProxyBuilderGenerator(handler);
       this.builder = new BridgeInstanceBuilder(generator, resolver, type);
-      this.support = new AndroidAdapterBuilder(this, resolver);
+      this.wrapper = new ProxyBuilderWrapper();
       this.type = type;
    }
 
    @Override
    public Instance superInstance(Scope scope, Type real, Object... list) {
       try {
-         Instance instance = builder.createInstance(scope, real, list);
-         InvocationHandler handler = support.createHandler(scope, instance);
-         Object bridge = instance.getBridge();
-         
-         ProxyBuilder.setInvocationHandler(bridge, handler);
+         BridgeInstance instance = builder.createInstance(scope, real, list);
 
+         try{
+            local.set(instance);
+            instance.getBridge().setInstance(instance);
+         } finally {
+            local.set(null);
+         }
          return instance;
       } catch (Exception e) {
          throw new IllegalStateException("Could not create super for '" + type + "'", e);
+      } finally {
+         local.set(null);
       }
    }
 
@@ -52,7 +63,7 @@ public class AndroidBridgeBuilder implements BridgeBuilder {
          Invocation invocation = invocations.fetch(method);
    
          if (invocation == null) {
-            invocation = support.createInvocation(scope, proxy, method);
+            invocation = wrapper.createInvocation(scope, proxy, method);
             invocations.cache(method, invocation);
          }
          return invocation;

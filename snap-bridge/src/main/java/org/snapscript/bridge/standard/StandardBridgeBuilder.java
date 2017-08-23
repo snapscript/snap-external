@@ -2,16 +2,14 @@ package org.snapscript.bridge.standard;
 
 import java.lang.reflect.Method;
 
+import org.snapscript.bridge.InvocationRouter;
+import org.snapscript.bridge.generate.BridgeInstance;
 import org.snapscript.bridge.generate.BridgeInstanceBuilder;
-import org.snapscript.cglib.proxy.Callback;
-import org.snapscript.cglib.proxy.Factory;
-import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
-import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.bridge.BridgeBuilder;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
@@ -19,32 +17,40 @@ import org.snapscript.core.function.Invocation;
 public class StandardBridgeBuilder implements BridgeBuilder {
    
    private final Cache<Method, Invocation> invocations;
+   private final MethodInterceptorHandler handler;
    private final EnhancerGenerator generator;
    private final BridgeInstanceBuilder builder;
-   private final StandardAdapterBuilder support;
+   private final MethodProxyWrapper wrapper;
+   private final InvocationRouter router;
+   private final ThreadLocal local;
    private final Type type;
 
    public StandardBridgeBuilder(FunctionResolver resolver, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
-      this.generator = new EnhancerGenerator(Bridge.class);
+      this.router = new InvocationRouter(this, resolver);
+      this.local = new ThreadLocal<BridgeInstance>();
+      this.handler = new MethodInterceptorHandler(local, router);
+      this.generator = new EnhancerGenerator(handler);
       this.builder = new BridgeInstanceBuilder(generator, resolver, type);
-      this.support = new StandardAdapterBuilder(this, resolver);
+      this.wrapper = new MethodProxyWrapper();
       this.type = type;
    }
 
    @Override
    public Instance superInstance(Scope scope, Type real, Object... list) {
       try {
-         Instance instance = builder.createInstance(scope, real, list);
-         MethodInterceptor handler = support.createInterceptor(scope, instance);
-         Factory factory = (Factory) instance.getBridge();
+         BridgeInstance instance = builder.createInstance(scope, real, list);
          
-         factory.setCallbacks(new Callback[] { handler });
-         
+         try{
+            local.set(instance);
+            instance.getBridge().setInstance(instance);
+         } finally {
+            local.set(null);
+         }
          return instance;
       } catch (Exception e) {
          throw new IllegalStateException("Could not create super for '" + type + "'", e);
-      }
+      } 
    }
 
    @Override
@@ -53,7 +59,7 @@ public class StandardBridgeBuilder implements BridgeBuilder {
          Invocation invocation = invocations.fetch(method);
    
          if (invocation == null) {
-            invocation = support.createInvocation(scope, proxy, method);
+            invocation = wrapper.createInvocation(scope, proxy, method);
             invocations.cache(method, invocation);
          }
          return invocation;

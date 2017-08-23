@@ -1,6 +1,7 @@
 package org.snapscript.bridge.standard;
 
 import org.snapscript.bridge.generate.ClassGenerator;
+import org.snapscript.cglib.proxy.Callback;
 import org.snapscript.cglib.proxy.Enhancer;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.core.Any;
@@ -8,17 +9,20 @@ import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeCache;
+import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.convert.InterfaceCollector;
 
-public class EnhancerGenerator implements ClassGenerator {
+public class EnhancerGenerator implements ClassGenerator{
 
    private final InterfaceCollector collector;
    private final TypeCache<Class> cache;
+   private final Callback[] interceptors;
    private final ClassLoader loader;
    
-   public EnhancerGenerator(Class... interfaces) {
-      this.collector = new InterfaceCollector(interfaces);
+   public EnhancerGenerator(MethodInterceptor interceptor) {
+      this.interceptors = new Callback[] {interceptor};
       this.loader = new ContextClassLoader(Any.class);
+      this.collector = new InterfaceCollector();
       this.cache = new TypeCache<Class>();      
    }
    
@@ -28,22 +32,25 @@ public class EnhancerGenerator implements ClassGenerator {
       
       if(proxy == null) {
          proxy = create(scope, type, base);
+         Enhancer.registerCallbacks(proxy, interceptors);
          cache.cache(type, proxy);
       }
       return proxy;
    }
    
    private Class create(Scope scope, Type type, Class base) {
-      Class[] types = collector.collect(type);
+      Class[] interfaces = collector.collect(type);
       
       try {
-         Class[] handlers = new Class[] {MethodInterceptor.class};
          Enhancer enhancer = new Enhancer();
+         Class[] types = new Class[] {MethodInterceptor.class};
          
          enhancer.setClassLoader(loader);
          enhancer.setSuperclass(base);
-         enhancer.setInterfaces(types); // ensure we can convert from object to Instance
-         enhancer.setCallbackTypes(handlers);
+         enhancer.setInterceptDuringConstruction(true);
+         enhancer.setBeanInterfaces(Bridge.class);
+         enhancer.setInterfaces(interfaces); // ensure we can convert from object to Instance
+         enhancer.setCallbackTypes(types);
          
          return enhancer.createClass();
       } catch(Exception e) {
