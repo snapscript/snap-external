@@ -38,8 +38,11 @@ public class BridgeBuilderTest extends TestCase {
             context.getStack());
       
       Type type = context.getLoader().defineType("foo", "Foo");
+      Type panel = context.getLoader().resolveType("javax.swing.JPanel");
+      
+      type.getTypes().add(panel);
 
-      BridgeBuilder builder = provider.create(context.getLoader().resolveType("javax.swing.JPanel"));
+      BridgeBuilder builder = provider.create(panel);
       Instance instance = builder.superInstance(scope, type);
       
       assertEquals(instance.getBridge().getClass().getSuperclass().getName(), "javax.swing.JPanel");
