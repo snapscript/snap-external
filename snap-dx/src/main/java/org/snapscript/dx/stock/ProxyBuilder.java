@@ -280,7 +280,7 @@ public final class ProxyBuilder<T> {
        generateCodeForAllMethods(dexMaker, generatedType, methodsToProxy, superType);
        dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC, superType,
                getInterfacesAsTypeIds(interfaces));
-       ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache);
+       ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
        try {
            proxyClass = loadClass(classLoader, generatedName);
        } catch (IllegalAccessError e) {
@@ -311,7 +311,7 @@ public final class ProxyBuilder<T> {
        generateCodeForBeanMethods(dexMaker, beanMethods, generatedType);
        dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC, superType,
                getInterfacesAsTypeIds(beanInterfaces));
-       ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache);
+       ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
        try {
            proxyClass = loadClass(classLoader, generatedName);
        } catch (IllegalAccessError e) {
@@ -463,7 +463,7 @@ public final class ProxyBuilder<T> {
           
           TypeId<?> propertyType = TypeId.get(type);
           FieldId<G, ?> propertyField = generatedType.getField(
-                propertyType, "$_" + name);
+                propertyType, "$__" + name);
           dexMaker.declare(propertyField, PUBLIC, null);
           
           generateGetterMethod(dexMaker, getter, name, propertyField, generatedType);

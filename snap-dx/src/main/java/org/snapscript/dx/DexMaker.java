@@ -329,7 +329,7 @@ public final class DexMaker {
 
     // Generate a file name for the jar by taking a checksum of MethodIds and
     // parent class types.
-    private String generateFileName() {
+    private String generateFileName(String generatedName) {
         int checksum = 1;
 
         Set<TypeId<?>> typesKeySet = types.keySet();
@@ -351,8 +351,8 @@ public final class DexMaker {
             checksum *= 31;
             checksum += sum;
         }
-
-        return "Generated_" + checksum +".jar";
+        String fileSuffix = generatedName + "_" + (checksum > 0 ? ("p"+ checksum) : ("n" + Math.abs(checksum)));
+        return "Generated_" + fileSuffix +".jar";
     }
 
     private ClassLoader generateClassLoader(File result, File dexCache, ClassLoader parent) {
@@ -398,7 +398,7 @@ public final class DexMaker {
      *     dex files will be written. If null, this class will try to guess the
      *     application's private data dir.
      */
-    public ClassLoader generateAndLoad(ClassLoader parent, File dexCache) throws IOException {
+    public ClassLoader generateAndLoad(ClassLoader parent, File dexCache, String generatedName) throws IOException {
         if (dexCache == null) {
             String property = System.getProperty("dexmaker.dexcache");
             if (property != null) {
@@ -412,7 +412,7 @@ public final class DexMaker {
             }
         }
 
-        File result = new File(dexCache, generateFileName());
+        File result = new File(dexCache, generateFileName(generatedName));
         // Check that the file exists. If it does, return a DexClassLoader and skip all
         // the dex bytecode generation.
         if (result.exists()) {

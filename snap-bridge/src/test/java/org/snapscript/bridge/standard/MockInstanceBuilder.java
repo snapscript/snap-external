@@ -16,7 +16,7 @@ public class MockInstanceBuilder {
    public static void createInstance(Context context) {
       Model model = new EmptyModel();
       Path path = new Path("/foo");
-      Module module = new ContextModule(context, path, "foo");
+      Module module = new ContextModule(context, null, path, "foo");
       Scope scope = new ModelScope(model, module);
       
       PlatformBridgeProvider provider = new PlatformBridgeProvider(

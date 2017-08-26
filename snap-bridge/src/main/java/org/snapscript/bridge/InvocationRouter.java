@@ -3,6 +3,7 @@ package org.snapscript.bridge;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
+import org.snapscript.core.Bug;
 import org.snapscript.core.Context;
 import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Module;
@@ -45,8 +46,9 @@ public class InvocationRouter {
          Context context = module.getContext();
          ProxyWrapper wrapper = context.getWrapper();
          Object value = result.getValue();
+         Class returns = method.getReturnType();
          
-         return wrapper.toProxy(value);
+         return wrapper.toProxy(value, returns);
       }
       return scope;
    }
