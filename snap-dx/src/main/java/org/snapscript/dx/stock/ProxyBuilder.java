@@ -141,7 +141,8 @@ public final class ProxyBuilder<T> {
     private Class<?>[] constructorArgTypes = new Class[0];
     private Object[] constructorArgValues = new Object[0];
     private Set<Class<?>> interfaces = new HashSet<Class<?>>();
-
+    private Set<Class<?>> beanInterfaces = new HashSet<Class<?>>();
+    
     private ProxyBuilder(Class<T> clazz) {
         baseClass = clazz;
     }
@@ -174,6 +175,16 @@ public final class ProxyBuilder<T> {
         dexCache = new File(dexCacheParent, "v" + Integer.toString(VERSION));
         dexCache.mkdir();
         return this;
+    }
+    
+    public ProxyBuilder<T> implementingBeans(Class<?>... beanInterfaces) {
+       for (Class<?> i : beanInterfaces) {
+          if (!i.isInterface()) {
+              throw new IllegalArgumentException("Not an interface: " + i.getName());
+          }
+          this.beanInterfaces.add(i);
+      }
+      return this;
     }
     
     public ProxyBuilder<T> implementing(Class<?>... interfaces) {
@@ -232,7 +243,6 @@ public final class ProxyBuilder<T> {
             // Thrown when the base class constructor throws an exception.
             throw launderCause(e);
         }
-        setInvocationHandler(result, handler);
         return result;
     }
 
@@ -248,6 +258,7 @@ public final class ProxyBuilder<T> {
        // try the cache to see if we've generated this one before
        @SuppressWarnings("unchecked") // we only populate the map with matching types
        Class<? extends T> proxyClass = (Class) generatedProxyClasses.get(baseClass);
+       Set<Class<?>> interfaces = determineImplementInterfaces();
        if (proxyClass != null
                && proxyClass.getClassLoader().getParent() == parentClassLoader
                && interfaces.equals(asSet(proxyClass.getInterfaces()))) {
@@ -265,10 +276,10 @@ public final class ProxyBuilder<T> {
        TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
        TypeId<T> superType = TypeId.get(baseClass);
        generateConstructorsAndFields(dexMaker, generatedType, superType, baseClass);
-       Method[] methodsToProxy = getMethodsToProxyRecursive();
+       Method[] methodsToProxy = getMethodsToProxyRecursive(interfaces);
        generateCodeForAllMethods(dexMaker, generatedType, methodsToProxy, superType);
        dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC, superType,
-               getInterfacesAsTypeIds());
+               getInterfacesAsTypeIds(interfaces));
        ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache);
        try {
            proxyClass = loadClass(classLoader, generatedName);
@@ -280,6 +291,7 @@ public final class ProxyBuilder<T> {
            // Should not be thrown, we're sure to have generated this class.
            throw new AssertionError(e);
        }
+       setInvocationHandler(proxyClass, handler);
        setMethodsStaticField(proxyClass, methodsToProxy);
        generatedProxyClasses.put(baseClass, proxyClass);
        return proxyClass;
@@ -294,9 +306,11 @@ public final class ProxyBuilder<T> {
        TypeId<T> superType = TypeId.get(baseClass);
        generateConstructorsForBridge(dexMaker, generatedType, superType, baseClass);
        Method[] abstractMethods = getAbstractMethodsToProxyRecursive();
+       BeanProperty[] beanMethods = getBeanMethodsToProxyRecursive();
        generateCodeForAbstractMethods(dexMaker, abstractMethods, generatedType);
+       generateCodeForBeanMethods(dexMaker, beanMethods, generatedType);
        dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC, superType,
-               getInterfacesAsTypeIds());
+               getInterfacesAsTypeIds(beanInterfaces));
        ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache);
        try {
            proxyClass = loadClass(classLoader, generatedName);
@@ -362,11 +376,11 @@ public final class ProxyBuilder<T> {
      *
      * @throws IllegalArgumentException if the object supplied is not a proxy created by this class.
      */
-    public static InvocationHandler getInvocationHandler(Object instance) {
+    public static InvocationHandler getInvocationHandler(Class<?> proxyClass) {
         try {
-            Field field = instance.getClass().getDeclaredField(FIELD_NAME_HANDLER);
+            Field field = proxyClass.getDeclaredField(FIELD_NAME_HANDLER);
             field.setAccessible(true);
-            return (InvocationHandler) field.get(instance);
+            return (InvocationHandler) field.get(null);
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException("Not a valid proxy instance", e);
         } catch (IllegalAccessException e) {
@@ -387,13 +401,13 @@ public final class ProxyBuilder<T> {
      *
      * @throws IllegalArgumentException if the object supplied is not a proxy created by this class.
      */
-    public static void setInvocationHandler(Object instance, InvocationHandler handler) {
+    public static void setInvocationHandler(Class<?> proxyClass, InvocationHandler handler) {
         try {
-            Field handlerField = instance.getClass().getDeclaredField(FIELD_NAME_HANDLER);
+            Field handlerField = proxyClass.getDeclaredField(FIELD_NAME_HANDLER);
             handlerField.setAccessible(true);
-            handlerField.set(instance, handler);
+            handlerField.set(null, handler);
         } catch (NoSuchFieldException e) {
-            throw new IllegalArgumentException("Not a valid proxy instance", e);
+            throw new IllegalArgumentException("Not a valid proxy class", e);
         } catch (IllegalAccessException e) {
             // Should not be thrown, we just set the field to accessible.
             throw new AssertionError(e);
@@ -436,6 +450,61 @@ public final class ProxyBuilder<T> {
           code.newInstance(localIse, iseConstructor);
           code.throwValue(localIse);
        }
+    }
+    
+    private static <T, G extends T> void generateCodeForBeanMethods(DexMaker dexMaker, BeanProperty[] methodsToImplement, 
+          TypeId<G> generatedType) {
+       for (int m = 0; m < methodsToImplement.length; ++m) {
+          BeanProperty method = methodsToImplement[m];
+          String name = method.getName();
+          Class type = method.getType();
+          Method setter = method.getSetter();
+          Method getter = method.getGetter();
+          
+          TypeId<?> propertyType = TypeId.get(type);
+          FieldId<G, ?> propertyField = generatedType.getField(
+                propertyType, "$_" + name);
+          dexMaker.declare(propertyField, PUBLIC, null);
+          
+          generateGetterMethod(dexMaker, getter, name, propertyField, generatedType);
+          generateSetterMethod(dexMaker, setter, name, propertyField, generatedType);
+       }
+    }
+    
+    private static <G, V> void generateGetterMethod(DexMaker dexMaker, Method method, String property, FieldId propertyField, TypeId<G> generatedType) {
+       String name = method.getName();
+       Class<?>[] argClasses = method.getParameterTypes();
+       Class<?> returnType = method.getReturnType();
+       TypeId<?>[] argTypes = new TypeId<?>[argClasses.length];
+       for (int i = 0; i < argTypes.length; ++i) {
+           argTypes[i] = TypeId.get(argClasses[i]);
+       }
+       TypeId<?> resultType = TypeId.get(returnType);
+       MethodId<G, ?> implementMethod = generatedType.getMethod(resultType, name, argTypes);
+       Code code = dexMaker.declare(implementMethod, PUBLIC);
+       // get property
+       Local<G> localThis = code.getThis(generatedType);
+       Local<?> localValue = code.newLocal(resultType);
+       code.iget(propertyField, localValue, localThis);
+       code.returnValue(localValue);
+    }
+    
+    private static <G> void generateSetterMethod(DexMaker dexMaker, Method method, String property, FieldId propertyField, TypeId<G> generatedType) {
+       String name = method.getName();
+       Class<?>[] argClasses = method.getParameterTypes();
+       Class<?> returnType = method.getReturnType();
+       TypeId<?>[] argTypes = new TypeId<?>[argClasses.length];
+       for (int i = 0; i < argTypes.length; ++i) {
+           argTypes[i] = TypeId.get(argClasses[i]);
+       }
+       TypeId<?> resultType = TypeId.get(returnType);
+       MethodId<G, ?> implementMethod = generatedType.getMethod(resultType, name, argTypes);
+       Code code = dexMaker.declare(implementMethod, PUBLIC);
+       // set property
+       Local<G> localThis = code.getThis(generatedType);
+       Local<?> parameter = code.getParameter(0, argTypes[0]);
+       code.iput(propertyField, localThis, parameter);
+       code.returnVoid();
     }
 
     private static <T, G extends T> void generateCodeForAllMethods(DexMaker dexMaker,
@@ -531,7 +600,7 @@ public final class ProxyBuilder<T> {
             code.aget(thisMethod, methodArray, methodIndex);
             code.loadConstant(argsLength, argTypes.length);
             code.newArray(args, argsLength);
-            code.iget(handlerField, localHandler, localThis);
+            code.sget(handlerField, localHandler);
 
             // if (proxy == null)
             code.loadConstant(nullHandler, null);
@@ -641,7 +710,7 @@ public final class ProxyBuilder<T> {
         TypeId<Method[]> methodArrayType = TypeId.get(Method[].class);
         FieldId<G, InvocationHandler> handlerField = generatedType.getField(
                 handlerType, FIELD_NAME_HANDLER);
-        dexMaker.declare(handlerField, PRIVATE, null);
+        dexMaker.declare(handlerField, PRIVATE | STATIC, null);
         FieldId<G, Method[]> allMethods = generatedType.getField(
                 methodArrayType, FIELD_NAME_METHODS);
         dexMaker.declare(allMethods, PRIVATE | STATIC, null);
@@ -691,7 +760,7 @@ public final class ProxyBuilder<T> {
         return (Constructor<T>[]) clazz.getDeclaredConstructors();
     }
 
-    private TypeId<?>[] getInterfacesAsTypeIds() {
+    private TypeId<?>[] getInterfacesAsTypeIds(Set<Class<?>> interfaces) {
         TypeId<?>[] result = new TypeId<?>[interfaces.size()];
         int i = 0;
         for (Class<?> implemented : interfaces) {
@@ -702,7 +771,7 @@ public final class ProxyBuilder<T> {
 
     private Method[] getAbstractMethodsToProxyRecursive() {
        Set<Method> abstractMethods = new HashSet<Method>();
-       Method[] allMethods = getMethodsToProxyRecursive();
+       Method[] allMethods = getMethodsToProxyRecursive(interfaces);
        for(Method method : allMethods){
           int modifiers = method.getModifiers();
           if(Modifier.isAbstract(modifiers)){
@@ -712,11 +781,68 @@ public final class ProxyBuilder<T> {
        return abstractMethods.toArray(new Method[]{});
    }
     
+    private static final class BeanProperty {
+       public final Method getter;
+       public final Method setter;
+       public final Class type;
+       public final String name;
+       public BeanProperty(Class type, String name, Method getter, Method setter){
+          this.name = name;
+          this.type = type;
+          this.setter = setter;
+          this.getter = getter;
+       }
+       public String getName(){
+          return name;
+       }
+       public Class getType(){
+          return type;
+       }
+       public Method getGetter(){
+          return getter;
+       }
+       public Method getSetter(){
+          return setter;
+       }
+    }
+    
+    private BeanProperty[] getBeanMethodsToProxyRecursive() {
+       Map<String, Method> getters = new HashMap<String, Method>();
+       Map<String, Method> setters = new HashMap<String, Method>();
+       Set<String> names = new HashSet<String>();
+       Set<BeanProperty> properties = new HashSet<BeanProperty>();
+       for(Class beanInterface : beanInterfaces) {
+          Method[] methods = beanInterface.getDeclaredMethods();
+          
+          for(Method method : methods) {
+             Class returnType = method.getReturnType();
+             String property = determinePropertyName(method);
+             
+             if(returnType != void.class) {
+                getters.put(property, method);
+             } else {
+                setters.put(property, method);
+             }
+             names.add(property);
+          }
+       }
+       for(String property : names) {
+          Method get = getters.get(property);
+          Method set = setters.get(property);
+          Class returnType = get.getReturnType();
+          properties.add(new BeanProperty(returnType, property, get, set));
+       }
+       return properties.toArray(new BeanProperty[]{});
+   }
+       
+       
+    
+    
     /**
      * Gets all {@link Method} objects we can proxy in the hierarchy of the
      * supplied class.
      */
-    private Method[] getMethodsToProxyRecursive() {
+    private Method[] getMethodsToProxyRecursive(Set<Class<?>> interferfaces) {
         Set<MethodSetEntry> methodsToProxy = new HashSet<MethodSetEntry>();
         Set<MethodSetEntry> seenFinalMethods = new HashSet<MethodSetEntry>();
         for (Class<?> c = baseClass; c != null; c = c.getSuperclass()) {
@@ -809,6 +935,50 @@ public final class ProxyBuilder<T> {
             result[i] = TypeId.get(input[i]);
         }
         return result;
+    }
+    
+    private String determinePropertyName(Method method) {
+       String name = method.getName();
+       Class returnType = method.getReturnType();
+       Class[] parameterTypes = method.getParameterTypes();
+       
+       if(name.startsWith("get")) {
+          if(returnType == void.class) {
+             throw new IllegalStateException("Get method '" + method + "' must return a type");
+          }
+          if(parameterTypes.length != 0) {
+             throw new IllegalStateException("Get method '" + method + "' must have no parameters");
+          }
+          return Character.toLowerCase(name.charAt(3)) + name.substring(4);
+       }
+       if(name.startsWith("set")) {
+          if(returnType != void.class) {
+             throw new IllegalStateException("Set method '" + method + "' must not return a type");
+          }
+          if(parameterTypes.length != 1) {
+             throw new IllegalStateException("Set method '" + method + "' must have a single parameter");
+          }
+          return  Character.toLowerCase(name.charAt(3)) + name.substring(4);
+       }
+       if(name.startsWith("is")) {
+          if(returnType != boolean.class && returnType != Boolean.class) {
+             throw new IllegalStateException("Get method '" + method + "' must return a boolean");
+          }
+          if(parameterTypes.length != 0) {
+             throw new IllegalStateException("Get method '" + method + "' must have no parameters");
+          }
+          return  Character.toLowerCase(name.charAt(2)) + name.substring(3);
+       }
+       throw new IllegalStateException("Method '" + method+ "' does not represent a property");
+    }
+    
+    private Set<Class<?>> determineImplementInterfaces() {
+       Set<Class<?>> combined = new HashSet<Class<?>>();
+       
+       combined.addAll(interfaces);
+       combined.addAll(beanInterfaces);
+       
+       return combined;
     }
 
     /**

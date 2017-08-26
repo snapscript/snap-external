@@ -8,6 +8,7 @@ import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeCache;
+import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.convert.InterfaceCollector;
 import org.snapscript.dx.stock.ProxyBuilder;
 
@@ -42,6 +43,7 @@ public class ProxyBuilderGenerator implements ClassGenerator{
          ProxyBuilder builder = ProxyBuilder.forClass(base);
          
          builder.implementing(interfaces);
+         builder.implementingBeans(Bridge.class);
          builder.parentClassLoader(loader);
          builder.handler(handler);
          

@@ -52,9 +52,7 @@ public class AndroidBridgeBuilder implements BridgeBuilder {
          return instance;
       } catch (Exception e) {
          throw new IllegalStateException("Could not create super for '" + type + "'", e);
-      } finally {
-         local.set(null);
-      }
+      } 
    }
 
    @Override

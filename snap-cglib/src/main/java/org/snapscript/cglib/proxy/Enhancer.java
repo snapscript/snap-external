@@ -722,7 +722,7 @@ public class Enhancer extends AbstractClassGenerator
           if(parameterTypes.length != 0) {
              throw new IllegalStateException("Get method '" + method + "' must have no parameters");
           }
-          return name.substring(3);
+          return Character.toLowerCase(name.charAt(3)) + name.substring(4);
        }
        if(name.startsWith("set")) {
           if(returnType != void.class) {
@@ -731,7 +731,7 @@ public class Enhancer extends AbstractClassGenerator
           if(parameterTypes.length != 1) {
              throw new IllegalStateException("Set method '" + method + "' must have a single parameter");
           }
-          return name.substring(3);
+          return  Character.toLowerCase(name.charAt(3)) + name.substring(4);
        }
        if(name.startsWith("is")) {
           if(returnType != boolean.class && returnType != Boolean.class) {
@@ -740,10 +740,11 @@ public class Enhancer extends AbstractClassGenerator
           if(parameterTypes.length != 0) {
              throw new IllegalStateException("Get method '" + method + "' must have no parameters");
           }
-          return name.substring(2);
+          return  Character.toLowerCase(name.charAt(2)) + name.substring(3);
        }
        throw new IllegalStateException("Method '" + method+ "' does not represent a property");
     }
+    
     
     private Class[] determineImplementInterfaces() {
        if(interfaces == null) {
