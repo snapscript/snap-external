@@ -19,6 +19,7 @@ package org.snapscript.dx.stock;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
+import static java.lang.reflect.Modifier.FINAL;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,7 @@ import org.snapscript.dx.Label;
 import org.snapscript.dx.Local;
 import org.snapscript.dx.MethodId;
 import org.snapscript.dx.TypeId;
+import org.snapscript.dx.rop.type.Type;
 
 
 /**
@@ -247,6 +249,31 @@ public final class ProxyBuilder<T> {
     }
 
     // TODO: test coverage for this
+    
+    public Class buildMethodAccessor(Method method) throws IOException {
+       DexMaker dexMaker = new DexMaker();
+       Class<? extends T> accessorClass = null;
+       // the cache missed; generate the class
+       String generatedName = getMethodNameForAccessorOf(method);
+       TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
+       TypeId<MethodAdapter> interfaceType = TypeId.get(MethodAdapter.class);
+       generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
+       generateCodeForAccessor(dexMaker, generatedType, method);
+       dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT,
+            interfaceType);
+       ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
+       try {
+          accessorClass = loadClass(classLoader, generatedName);
+       } catch (IllegalAccessError e) {
+           // Thrown when the base class is not accessible.
+           throw new UnsupportedOperationException(
+                   "cannot proxy inaccessible class " + baseClass, e);
+       } catch (ClassNotFoundException e) {
+           // Should not be thrown, we're sure to have generated this class.
+           throw new AssertionError(e);
+       }
+       return accessorClass;
+    }
 
     /**
      * Generate a proxy class. Note that new instances of this class will not automatically have an
@@ -427,6 +454,105 @@ public final class ProxyBuilder<T> {
         } catch (NoSuchFieldException e) {
             return false;
         }
+    }
+    
+    
+    
+    private static <T, G extends T> void generateCodeForAccessor(DexMaker dexMaker,
+          TypeId<G> generatedType, Method accessorMethod) {
+       int modifiers = accessorMethod.getModifiers();
+       String name = accessorMethod.getName();
+       Class declaringClass = accessorMethod.getDeclaringClass();
+       Class<?>[] argClasses = accessorMethod.getParameterTypes();
+       Class<?> returnClass = accessorMethod.getReturnType();
+       TypeId<Object[]> objectArrayType = TypeId.get(Object[].class);
+       TypeId<Object> objectType = TypeId.get(Object.class);
+       TypeId instanceType = TypeId.get(declaringClass);
+       TypeId[] argTypes = new TypeId[argClasses.length];
+       Local[] argumentHolders = new Local[argTypes.length];
+       Local[] boxedParameterHolder = new Local[argTypes.length];
+       Local[] realParameterHolders = new Local[argTypes.length];
+       for (int i = 0; i < argTypes.length; ++i) {
+           argTypes[i] = TypeId.get(argClasses[i]);
+       }
+       TypeId returnType = TypeId.get(returnClass);
+       MethodId methodToGenerate = generatedType.getMethod(objectType, "invoke", objectType, objectArrayType); // public Object invoke(Object targetObject, Object[] argumentarray)
+       MethodId methodToInvoke = instanceType.getMethod(returnType, name, argTypes);
+       Code code = dexMaker.declare(methodToGenerate, PUBLIC | FINAL);
+    
+       /*
+        *  The code generated basically casts the object and the arguments
+        *  and then invoke the type, we need to make sure this is public
+        * 
+        *  // List.get(int): Object
+        * 
+        *  public Object invoke(Object object, Object[] arguments) {
+        *     List instance;
+        *     Object ret;
+        *     Object result;
+        *     Object argument;
+        *     Integer boxed;
+        *     int real;
+        *     
+        *     argument = arguments[0];
+        *     boxed = (Integer)argument;
+        *     real = boxed.intValue();
+        *     instance = (List)object;
+        *     result = instance.get(real);
+        *     ret = (Object)result;
+        *     
+        *     return ret;
+        *  }
+        */
+
+       Local temp = code.newLocal(TypeId.OBJECT); // Object ret
+       Local targetObject = code.getParameter(0, TypeId.OBJECT);
+       Local argumentArray = code.getParameter(1, objectArrayType);
+       Local<Integer> intValue = code.newLocal(TypeId.INT); // declare int to index argumentValues
+       Local returnValue = code.newLocal(TypeId.OBJECT); // Object ret
+       Local resultHolder = code.newLocal(returnType);
+       Local instanceHolder = null;
+       
+       if(!Modifier.isStatic(modifiers)) {
+          instanceHolder = code.newLocal(instanceType); // ObjectToInvoke target
+       }
+       for (int p = 0; p < argTypes.length; ++p) {
+          argumentHolders[p] = code.newLocal(objectType); // Object element
+          Class boxedType = PRIMITIVE_TO_BOXED.get(argClasses[p]);
+          
+          if(boxedType != null) {
+             boxedParameterHolder[p] = code.newLocal(TypeId.get(boxedType));
+             realParameterHolders[p] = code.newLocal(argTypes[p]);  // the primitive type
+          } else {
+             boxedParameterHolder[p] = code.newLocal(argTypes[p]); // MyObject local
+             realParameterHolders[p] = boxedParameterHolder[p];
+          }
+       }
+       for (int p = 0; p < argTypes.length; ++p) {
+           code.loadConstant(intValue, p); // i = 0
+           code.aget(argumentHolders[p], argumentArray, intValue); // element = arguments[i]
+ 
+           if (PRIMITIVE_TO_UNBOX_METHOD.containsKey(argClasses[p])) {
+              code.cast(boxedParameterHolder[p], argumentHolders[p]); //  x = (Integer)element
+              MethodId unboxingMethodFor = getUnboxMethodForPrimitive(argClasses[p]);
+              code.invokeVirtual(unboxingMethodFor, realParameterHolders[p], boxedParameterHolder[p]);
+           } else {
+              code.cast(realParameterHolders[p], argumentHolders[p]); // local = (MyObject)element;
+          }
+       }
+       if(Modifier.isStatic(modifiers)) {
+          code.invokeStatic(methodToInvoke, resultHolder, realParameterHolders);
+       } else if(declaringClass.isInterface()){
+          code.cast(instanceHolder, targetObject); // target = (ObjectToInvoke)object
+          code.invokeInterface(methodToInvoke, resultHolder, instanceHolder, realParameterHolders);
+       } else {
+          code.cast(instanceHolder, targetObject); // target = (ObjectToInvoke)object
+          code.invokeVirtual(methodToInvoke, resultHolder, instanceHolder, realParameterHolders);
+       } 
+       Local boxedIfNecessary = boxIfRequired(code, resultHolder, temp);
+       
+       code.cast(returnValue, boxedIfNecessary); // ret = (Object)result
+       code.returnValue(returnValue); // return ret
     }
     
     private static <T, G extends T> void generateCodeForAbstractMethods(DexMaker dexMaker, Method[] methodsToImplement, 
@@ -732,6 +858,15 @@ public final class ProxyBuilder<T> {
         }
     }
     
+    private static <T, G extends T> void generateConstructorsForAccessor(DexMaker dexMaker,
+          TypeId<G> generatedType, TypeId<T> superType) {
+       MethodId<?, ?> method = generatedType.getConstructor();
+       Code constructorCode = dexMaker.declare(method, PUBLIC); // declare constructor 
+       Local<G> thisRef = constructorCode.getThis(generatedType);
+       constructorCode.invokeDirect(TypeId.OBJECT.getConstructor(), null, thisRef);
+       constructorCode.returnVoid();
+    }
+    
     private static <T, G extends T> void generateConstructorsForBridge(DexMaker dexMaker,
           TypeId<G> generatedType, TypeId<T> superType, Class<T> superClass) {
       for (Constructor<T> constructor : getConstructorsToOverwrite(superClass)) {
@@ -927,6 +1062,10 @@ public final class ProxyBuilder<T> {
     
     private static <T> String getMethodNameForBridgeOf(Class<T> clazz) {
        return clazz.getSimpleName() + "_Bridge";
+    }
+    
+    private static <T> String getMethodNameForAccessorOf(Method method) {
+       return method.getDeclaringClass().getSimpleName() + "_" + method.getName() + "_Accessor";
    }
 
     private static TypeId<?>[] classArrayToTypeArray(Class<?>[] input) {
