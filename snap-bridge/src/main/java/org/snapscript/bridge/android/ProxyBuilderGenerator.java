@@ -3,8 +3,6 @@ package org.snapscript.bridge.android;
 import java.lang.reflect.InvocationHandler;
 
 import org.snapscript.bridge.generate.ClassGenerator;
-import org.snapscript.core.Any;
-import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeCache;

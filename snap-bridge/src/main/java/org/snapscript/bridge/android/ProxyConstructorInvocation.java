@@ -1,7 +1,6 @@
 package org.snapscript.bridge.android;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -10,7 +9,6 @@ import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Result;
 import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
-import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.dx.stock.ProxyAdapter;
 
@@ -65,29 +63,19 @@ public class ProxyConstructorInvocation implements Invocation {
    private class ProxyExchanger implements Runnable {
       
       private final ProxyAdapterGenerator generator;
+      private final ProxyClassFilter filter;
       private final Constructor constructor;
       
       public ProxyExchanger(ProxyAdapterGenerator generator, Constructor constructor) {
+         this.filter = new ProxyClassFilter();
          this.constructor = constructor;
          this.generator = generator;
       }
 
       @Override
       public void run() {
-         System.out.println("############################# generating: "+constructor);
-         try {
-            Class parent = constructor.getDeclaringClass();
-            int modifiers = constructor.getModifiers();
-            
-            if(Modifier.isPublic(modifiers) && !Bridge.class.isAssignableFrom(parent)) { // in a private dex class loader
-               reference = generator.generate(constructor);
-            } else {
-               System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> IGNORE AS ITS NOT PUBLIC: "+constructor);
-            }
-         }catch(Exception e){
-            e.printStackTrace();
-         }finally {
-            System.out.println("############################# finished generating: "+constructor+ " as "+reference);
+         if(filter.accept(constructor)) { // in a private dex class loader
+            reference = generator.generate(constructor);
          }
       }
    }

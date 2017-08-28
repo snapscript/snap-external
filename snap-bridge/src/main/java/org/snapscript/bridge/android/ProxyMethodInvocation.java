@@ -65,29 +65,19 @@ public class ProxyMethodInvocation implements Invocation {
    private class ProxyExchanger implements Runnable {
       
       private final ProxyAdapterGenerator generator;
+      private final ProxyClassFilter filter;
       private final Method method;
       
       public ProxyExchanger(ProxyAdapterGenerator generator, Method method) {
+         this.filter = new ProxyClassFilter();
          this.generator = generator;
          this.method = method;
       }
 
       @Override
       public void run() {
-         System.out.println("############################# generating: "+method);
-         try {
-            Class parent = method.getDeclaringClass();
-            int modifiers = method.getModifiers();
-            
-            if(Modifier.isPublic(modifiers) && !Bridge.class.isAssignableFrom(parent)) { // in a private dex class loader
-               reference = generator.generate(method);
-            } else {
-               System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> IGNORE AS ITS NOT PUBLIC: "+method);
-            }
-         }catch(Exception e){
-            e.printStackTrace();
-         }finally {
-            System.out.println("############################# finished generating: "+method+ " as "+reference);
+         if(filter.accept(method)) { // in a private dex class loader
+            reference = generator.generate(method);
          }
       }
    }
