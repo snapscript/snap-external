@@ -1,5 +1,6 @@
 package org.snapscript.bridge.android;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
@@ -11,6 +12,7 @@ import org.snapscript.bridge.generate.BridgeInstanceBuilder;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
 import org.snapscript.core.Any;
+import org.snapscript.core.Bug;
 import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
@@ -21,8 +23,10 @@ import org.snapscript.core.function.Invocation;
 
 public class AndroidBridgeBuilder implements BridgeBuilder {
 
-   private final Cache<Method, Invocation> builders;
-   private final Cache<Method, Invocation> adapters;
+   @Bug("we should not crreate a BridgeBuilder based on type, there should be only one")
+   private final static Cache<Object, Invocation> adapters = new CopyOnWriteCache<Object, Invocation>();
+   
+   private final Cache<Object, Invocation> builders;
    private final ProxyBuilderGenerator generator;
    private final BridgeInstanceBuilder builder;
    private final ProxyBuilderWrapper wrapper;
@@ -33,8 +37,7 @@ public class AndroidBridgeBuilder implements BridgeBuilder {
    private final Type type;
 
    public AndroidBridgeBuilder(FunctionResolver resolver, Executor executor, Type type) {
-      this.adapters = new CopyOnWriteCache<Method, Invocation>();
-      this.builders = new CopyOnWriteCache<Method, Invocation>();
+      this.builders = new CopyOnWriteCache<Object, Invocation>();
       this.loader = new ContextClassLoader(Any.class);
       this.router = new InvocationRouter(this, resolver);
       this.local = new ThreadLocal<BridgeInstance>();
@@ -89,6 +92,21 @@ public class AndroidBridgeBuilder implements BridgeBuilder {
          return invocation;
       } catch (Exception e) {
          throw new IllegalStateException("Could not create adapter for '" + method + "'", e);
+      }
+   }
+   
+   @Override
+   public Invocation thisInvocation(Scope scope, Constructor constructor) {
+      try {
+         Invocation invocation = adapters.fetch(constructor);
+   
+         if (invocation == null) {
+            invocation = wrapper.thisInvocation(scope, constructor);
+            adapters.cache(constructor, invocation);
+         }
+         return invocation;
+      } catch (Exception e) {
+         throw new IllegalStateException("Could not create adapter for '" + constructor + "'", e);
       }
    }
 }

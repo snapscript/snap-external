@@ -1,5 +1,6 @@
 package org.snapscript.bridge.standard;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.snapscript.asm.Type;
@@ -28,6 +29,10 @@ public class MethodProxyWrapper {
    
    public Invocation thisInvocation(Scope scope, Method method) {
       return new MethodAdapterInvocation(method);
+   }
+   
+   public Invocation thisInvocation(Scope scope, Constructor constructor) {
+      return new ConstructorAdapterInvocation(constructor);
    }
 
    private Signature createSignature(String name, Class returns, Class[] parameters) {

@@ -1,5 +1,6 @@
 package org.snapscript.bridge.standard;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
@@ -75,6 +76,15 @@ public class StandardBridgeBuilder implements BridgeBuilder {
          return wrapper.thisInvocation(scope, method);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create invocation for '" + method + "'", e);
+      }
+   }
+   
+   @Override
+   public Invocation thisInvocation(Scope scope, Constructor constructor) {
+      try {
+         return wrapper.thisInvocation(scope, constructor);
+      } catch (Exception e) {
+         throw new IllegalStateException("Could not create invocation for '" + constructor + "'", e);
       }
    }
 }

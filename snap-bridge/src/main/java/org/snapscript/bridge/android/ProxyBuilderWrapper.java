@@ -1,5 +1,6 @@
 package org.snapscript.bridge.android;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
@@ -21,6 +22,10 @@ public class ProxyBuilderWrapper {
    }
    
    public Invocation thisInvocation(Scope scope, Method method) {
-      return new ProxyAdapterInvocation(generator, method, executor);
+      return new ProxyMethodInvocation(generator, method, executor);
+   }
+   
+   public Invocation thisInvocation(Scope scope, Constructor constructor) {
+      return new ProxyConstructorInvocation(generator, constructor, executor);
    }
 }
