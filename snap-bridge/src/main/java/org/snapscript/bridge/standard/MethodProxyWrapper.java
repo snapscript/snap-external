@@ -16,7 +16,7 @@ public class MethodProxyWrapper {
       this.empty = new Type[] {};
    }
 
-   public Invocation createInvocation(Scope scope, Class type, Method method) {
+   public Invocation superInvocation(Scope scope, Class type, Method method) {
       String name = method.getName();
       Class returns = method.getReturnType();
       Class[] parameters = method.getParameterTypes();
@@ -24,6 +24,10 @@ public class MethodProxyWrapper {
       MethodProxy proxy = MethodProxy.find(type, signature);
       
       return new MethodProxyInvocation(proxy);
+   }
+   
+   public Invocation thisInvocation(Scope scope, Method method) {
+      return new MethodAdapterInvocation(method);
    }
 
    private Signature createSignature(String name, Class returns, Class[] parameters) {

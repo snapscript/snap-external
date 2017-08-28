@@ -19,11 +19,11 @@ public class ProxyBuilderGenerator implements ClassGenerator{
    private final TypeCache<Class> cache;
    private final ClassLoader loader;
    
-   public ProxyBuilderGenerator(InvocationHandler handler) {
-      this.loader = new ContextClassLoader(Any.class);
+   public ProxyBuilderGenerator(InvocationHandler handler, ClassLoader loader) {
       this.collector = new InterfaceCollector();
       this.cache = new TypeCache<Class>();
       this.handler = handler;
+      this.loader = loader;
    }
    
    @Override

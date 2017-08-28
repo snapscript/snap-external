@@ -1,6 +1,7 @@
 package org.snapscript.bridge.standard;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 
 import org.snapscript.bridge.InvocationRouter;
 import org.snapscript.bridge.generate.BridgeInstance;
@@ -25,7 +26,7 @@ public class StandardBridgeBuilder implements BridgeBuilder {
    private final ThreadLocal local;
    private final Type type;
 
-   public StandardBridgeBuilder(FunctionResolver resolver, Type type) {
+   public StandardBridgeBuilder(FunctionResolver resolver, Executor executor, Type type) {
       this.invocations = new CopyOnWriteCache<Method, Invocation>();
       this.router = new InvocationRouter(this, resolver);
       this.local = new ThreadLocal<BridgeInstance>();
@@ -59,12 +60,21 @@ public class StandardBridgeBuilder implements BridgeBuilder {
          Invocation invocation = invocations.fetch(method);
    
          if (invocation == null) {
-            invocation = wrapper.createInvocation(scope, proxy, method);
+            invocation = wrapper.superInvocation(scope, proxy, method);
             invocations.cache(method, invocation);
          }
          return invocation;
       } catch (Exception e) {
          throw new IllegalStateException("Could not call super for '" + method + "'", e);
+      }
+   }
+
+   @Override
+   public Invocation thisInvocation(Scope scope, Method method) {
+      try {
+         return wrapper.thisInvocation(scope, method);
+      } catch (Exception e) {
+         throw new IllegalStateException("Could not create invocation for '" + method + "'", e);
       }
    }
 }

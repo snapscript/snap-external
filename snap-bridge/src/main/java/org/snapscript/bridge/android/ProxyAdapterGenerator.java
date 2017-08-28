@@ -1,0 +1,39 @@
+package org.snapscript.bridge.android;
+
+import java.lang.reflect.Method;
+
+import org.snapscript.dx.stock.ProxyAdapter;
+import org.snapscript.dx.stock.ProxyBuilder;
+
+public class ProxyAdapterGenerator {
+   
+   private final ClassLoader loader;
+   
+   public ProxyAdapterGenerator(ClassLoader loader) {
+      this.loader = loader;
+   }
+
+   public ProxyAdapter generate(Method method) {
+      Class adapter = create(method);
+      
+      try {
+         return (ProxyAdapter)adapter.newInstance();
+      }catch(Exception e) {
+         throw new IllegalStateException("Could not create adapter " + adapter, e);
+      }
+   }
+   
+   private Class create(Method method) {
+      try {
+         ProxyBuilder builder = ProxyBuilder.forClass(Object.class);
+         
+         builder.parentClassLoader(loader);
+         builder.implementing(ProxyAdapter.class);
+         
+         return builder.buildMethodAccessor(method);
+      }catch(Exception e) {
+         throw new IllegalStateException("Could not generate " + method, e);
+      }
+   }
+
+}

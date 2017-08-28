@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -256,7 +257,7 @@ public final class ProxyBuilder<T> {
        // the cache missed; generate the class
        String generatedName = getMethodNameForAccessorOf(method);
        TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
-       TypeId<MethodAdapter> interfaceType = TypeId.get(MethodAdapter.class);
+       TypeId<ProxyAdapter> interfaceType = TypeId.get(ProxyAdapter.class);
        generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
        generateCodeForAccessor(dexMaker, generatedType, method);
        dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT,
@@ -510,9 +511,12 @@ public final class ProxyBuilder<T> {
        Local argumentArray = code.getParameter(1, objectArrayType);
        Local<Integer> intValue = code.newLocal(TypeId.INT); // declare int to index argumentValues
        Local returnValue = code.newLocal(TypeId.OBJECT); // Object ret
-       Local resultHolder = code.newLocal(returnType);
+       Local resultHolder = null; 
        Local instanceHolder = null;
        
+       if(returnClass != void.class) {
+          resultHolder = code.newLocal(returnType);
+       }
        if(!Modifier.isStatic(modifiers)) {
           instanceHolder = code.newLocal(instanceType); // ObjectToInvoke target
        }
@@ -549,9 +553,12 @@ public final class ProxyBuilder<T> {
           code.cast(instanceHolder, targetObject); // target = (ObjectToInvoke)object
           code.invokeVirtual(methodToInvoke, resultHolder, instanceHolder, realParameterHolders);
        } 
-       Local boxedIfNecessary = boxIfRequired(code, resultHolder, temp);
-       
-       code.cast(returnValue, boxedIfNecessary); // ret = (Object)result
+       if(returnClass != void.class) {
+          Local boxedIfNecessary = boxIfRequired(code, resultHolder, temp);
+          code.cast(returnValue, boxedIfNecessary); // ret = (Object)result
+       } else {
+          code.loadConstant(returnValue, null); // return null
+       }
        code.returnValue(returnValue); // return ret
     }
     
@@ -1065,7 +1072,31 @@ public final class ProxyBuilder<T> {
     }
     
     private static <T> String getMethodNameForAccessorOf(Method method) {
-       return method.getDeclaringClass().getSimpleName() + "_" + method.getName() + "_Accessor";
+       try {
+          String name = method.getName();
+          String type = method.getDeclaringClass().getSimpleName();
+          String source = method.toString();
+          byte[] data = source.getBytes();
+          MessageDigest digest = MessageDigest.getInstance("MD5");
+          byte[] octets = digest.digest(data);
+
+          StringBuilder builder = new StringBuilder();
+          builder.append(type);
+          builder.append("_");
+          builder.append(name);
+          builder.append("_");
+          
+          for (int i = 0; i < octets.length; i++) {
+             int value = (octets[i] & 0xff) + 0x100;
+             String code = Integer.toString(value, 16);
+             String token = code.substring(1);
+             
+             builder.append(token);
+          }
+          return builder.toString();
+       }catch(Exception e) {
+          throw new IllegalStateException("Unable to generate name for " + method, e);
+       }
    }
 
     private static TypeId<?>[] classArrayToTypeArray(Class<?>[] input) {
