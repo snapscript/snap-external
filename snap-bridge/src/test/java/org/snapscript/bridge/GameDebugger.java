@@ -17,7 +17,7 @@ public class GameDebugger {
    public static void main(String[] list) throws Exception {
       File file = new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-develop\\work\\demo");
       Store store = new FileStore(file);
-      Executor executor = new ThreadPool(10);
+      Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
       

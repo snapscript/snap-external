@@ -10,6 +10,7 @@ import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Result;
 import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
+import org.snapscript.core.bridge.Bridge;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.dx.stock.ProxyAdapter;
 
@@ -75,9 +76,10 @@ public class ProxyMethodInvocation implements Invocation {
       public void run() {
          System.out.println("############################# generating: "+method);
          try {
+            Class parent = method.getDeclaringClass();
             int modifiers = method.getModifiers();
             
-            if(Modifier.isPublic(modifiers)) {
+            if(Modifier.isPublic(modifiers) && !Bridge.class.isAssignableFrom(parent)) { // in a private dex class loader
                reference = generator.generate(method);
             } else {
                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> IGNORE AS ITS NOT PUBLIC: "+method);
