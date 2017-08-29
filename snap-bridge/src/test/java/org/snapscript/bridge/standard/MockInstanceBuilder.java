@@ -1,5 +1,7 @@
 package org.snapscript.bridge.standard;
 
+import static org.snapscript.core.Category.CLASS;
+
 import org.snapscript.core.Context;
 import org.snapscript.core.ContextModule;
 import org.snapscript.core.EmptyModel;
@@ -24,7 +26,7 @@ public class MockInstanceBuilder {
             context.getStack());
       
       BridgeBuilder builder = provider.create(context.getLoader().resolveType("javax.swing.JPanel"));
-      Instance instance = builder.superInstance(scope, context.getLoader().defineType("foo", "Foo"));
+      Instance instance = builder.superInstance(scope, context.getLoader().defineType("foo", "Foo", CLASS));
       
       if(!instance.getBridge().getClass().getSuperclass().getName().equals("javax.swing.JPanel")){
          throw new RuntimeException(instance.getBridge().getClass().getName());

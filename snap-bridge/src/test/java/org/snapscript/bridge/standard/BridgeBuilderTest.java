@@ -1,9 +1,11 @@
 package org.snapscript.bridge.standard;
 
+import static org.snapscript.core.Category.CLASS;
 import junit.framework.TestCase;
 
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
+import org.snapscript.core.Category;
 import org.snapscript.core.Context;
 import org.snapscript.core.ContextModule;
 import org.snapscript.core.EmptyModel;
@@ -37,7 +39,7 @@ public class BridgeBuilderTest extends TestCase {
             context.getExtractor(), 
             context.getStack());
       
-      Type type = context.getLoader().defineType("foo", "Foo");
+      Type type = context.getLoader().defineType("foo", "Foo", CLASS);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
       
       type.getTypes().add(panel);
