@@ -48,7 +48,10 @@ public class InvocationRouter {
          Object value = result.getValue();
          Class returns = method.getReturnType();
          
-         return wrapper.toProxy(value, returns);
+         if(returns != void.class) {
+            return wrapper.toProxy(value, returns);
+         }
+         return null;
       }
       return scope;
    }
