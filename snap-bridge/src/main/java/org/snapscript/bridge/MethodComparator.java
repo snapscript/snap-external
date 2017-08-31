@@ -1,6 +1,8 @@
 package org.snapscript.bridge;
 
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Signature;
@@ -25,10 +27,14 @@ public class MethodComparator {
    public boolean isEqual(Function function, Method method) {
       if(function != null) {
          Signature signature = function.getSignature();
-         Object source = signature.getSource();
+         Member source = signature.getSource();
          
          if(source != null) {
-            return method.equals(source);
+            int modifiers = source.getModifiers();
+            
+            if(!Modifier.isAbstract(modifiers)) {
+               return method.equals(source);
+            }
          }
       }
       return false;

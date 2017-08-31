@@ -21,9 +21,7 @@ public class MockInstanceBuilder {
       Module module = new ContextModule(context, null, path, "foo");
       Scope scope = new ModelScope(model, module);
       
-      PlatformBridgeProvider provider = new PlatformBridgeProvider(
-            context.getExtractor(), 
-            context.getStack());
+      PlatformBridgeProvider provider = new PlatformBridgeProvider(context.getExtractor());
       
       BridgeBuilder builder = provider.create(context.getLoader().resolveType("javax.swing.JPanel"));
       Instance instance = builder.superInstance(scope, context.getLoader().defineType("foo", "Foo", CLASS));

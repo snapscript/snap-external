@@ -35,9 +35,7 @@ public class BridgeBuilderTest extends TestCase {
       Module module = new ContextModule(context, null, path, "foo");
       Scope scope = new ModelScope(model, module);
       
-      PlatformBridgeProvider provider = new PlatformBridgeProvider(
-            context.getExtractor(), 
-            context.getStack());
+      PlatformBridgeProvider provider = new PlatformBridgeProvider(context.getExtractor());
       
       Type type = context.getLoader().defineType("foo", "Foo", CLASS);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
