@@ -12,18 +12,17 @@ import org.snapscript.core.property.Property;
 
 public class BridgeInstanceConverter {
    
-   private final Type type;
-   
-   public BridgeInstanceConverter(Type type) {
-      this.type = type;
+   public BridgeInstanceConverter() {
+      super();
    }
 
    public void convert(BridgeInstance instance) {
       Value self = ValueType.getReference(instance);
-      List<Type> types = type.getTypes();
+      Type base = instance.getBase(); // this might be the wrong type
+      List<Type> types = base.getTypes();
       State state = instance.getState();
       
-      update(instance, state, type);
+      update(instance, state, base);
       
       for(Type type : types) {
          update(instance, state, type);

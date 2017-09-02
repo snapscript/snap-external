@@ -6,7 +6,6 @@ import org.snapscript.cglib.proxy.Enhancer;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.core.Any;
 import org.snapscript.core.ContextClassLoader;
-import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeCache;
 import org.snapscript.core.bridge.Bridge;
@@ -27,18 +26,18 @@ public class EnhancerGenerator implements ClassGenerator{
    }
    
    @Override
-   public Class generate(Scope scope, Type type, Class base) {
+   public Class generate(Type type, Class base) {
       Class proxy = cache.fetch(type);
       
       if(proxy == null) {
-         proxy = create(scope, type, base);
+         proxy = create(type, base);
          Enhancer.registerCallbacks(proxy, interceptors);
          cache.cache(type, proxy);
       }
       return proxy;
    }
    
-   private Class create(Scope scope, Type type, Class base) {
+   private Class create(Type type, Class base) {
       Class[] interfaces = collector.collect(type);
       
       try {

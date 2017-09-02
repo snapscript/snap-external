@@ -21,32 +21,33 @@ public class ObjectGenerator {
       this.generator = generator;
    }
 
-   public BridgeHolder generate(Scope scope, Type real, Class base, Object... arguments) throws Exception {
-      BridgeConstructor builder = create(scope, real, base, arguments);
+   public BridgeHolder generate(Type real, Class base, Object... arguments) throws Exception {
+      BridgeConstructor builder = create(real, base, arguments);
       return new BridgeHolder(builder);
    }
    
-   private BridgeConstructor create(Scope scope, Type real, Class base, Object... arguments) throws Exception {
-      Class proxy = generator.generate(scope, real, base);
-      return new BridgeConstructor(scope, proxy, base, arguments);
+   private BridgeConstructor create(Type real, Class base, Object... arguments) throws Exception {
+      Class proxy = generator.generate(real, base);
+      return new BridgeConstructor(real, proxy, base, arguments);
    }
    
    private class BridgeConstructor implements Callable<Bridge> {
       
       private final Object[] arguments;
-      private final Scope scope;
       private final Class proxy;
       private final Class base;
+      private final Type type;
       
-      public BridgeConstructor(Scope scope, Class proxy, Class base, Object... arguments) {
+      public BridgeConstructor(Type type, Class proxy, Class base, Object... arguments) {
          this.arguments = arguments;
-         this.scope = scope;
          this.proxy = proxy;
          this.base = base;
+         this.type = type;
       }
 
       @Override
       public Bridge call() throws Exception {
+         Scope scope = type.getScope();
          Module module = scope.getModule();
          Context context = module.getContext();
          TypeLoader loader = context.getLoader();

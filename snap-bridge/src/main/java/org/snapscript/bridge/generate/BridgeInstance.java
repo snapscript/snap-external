@@ -15,12 +15,14 @@ public class BridgeInstance implements Instance {
    private final Module module;
    private final State state;
    private final Type real;
+   private final Type base;
 
-   public BridgeInstance(BridgeHolder holder, Module module, Scope scope, Type real) {
+   public BridgeInstance(BridgeHolder holder, Module module, Scope scope, Type real, Type base) {
       this.state = new MapState(null, scope);
       this.holder = holder;
       this.module = module;
       this.real = real;
+      this.base = base;
    }
    
    public BridgeHolder getHolder() {
@@ -50,6 +52,10 @@ public class BridgeInstance implements Instance {
    @Override
    public Type getType() {
       return real;
+   }
+   
+   public Type getBase() {
+      return base;
    }
 
    @Override

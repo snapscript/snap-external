@@ -58,7 +58,6 @@ public class InvocationRouter {
    
    private Invocation bind(Bridge bridge, Instance instance, Method method, Object[] list) throws Throwable {
       String name = method.getName();
-      Class real = bridge.getClass();
       Type type = instance.getType();
       Scope scope = binder.bind(instance, instance);
       Function function = resolver.resolve(type, name, list); 
@@ -67,7 +66,7 @@ public class InvocationRouter {
          throw new InternalStateException("No implementaton of " + method + " for '" + type + "'");
       }
       if (comparator.isEqual(function, method)) {
-         return builder.superInvocation(instance, real, method);
+         return builder.superMethod(type, method);
       }
       Module module = scope.getModule();
       Context context = module.getContext();
@@ -75,7 +74,7 @@ public class InvocationRouter {
       Callable<Result> call = binder.bind(scope, scope, name, list);
       
       if (call == null) {
-         return builder.superInvocation(instance, real, method);
+         return builder.superMethod(type, method);
       }
       return new CallableInvocation(call);
    

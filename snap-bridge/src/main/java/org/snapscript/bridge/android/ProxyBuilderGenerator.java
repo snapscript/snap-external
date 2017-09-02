@@ -3,7 +3,6 @@ package org.snapscript.bridge.android;
 import java.lang.reflect.InvocationHandler;
 
 import org.snapscript.bridge.generate.ClassGenerator;
-import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.TypeCache;
 import org.snapscript.core.bridge.Bridge;
@@ -25,17 +24,17 @@ public class ProxyBuilderGenerator implements ClassGenerator{
    }
    
    @Override
-   public Class generate(Scope scope, Type type, Class base) {
+   public Class generate(Type type, Class base) {
       Class proxy = cache.fetch(type);
       
       if(proxy == null) {
-         proxy = create(scope, type, base);
+         proxy = create(type, base);
          cache.cache(type, proxy);
       }
       return proxy;
    }
    
-   private Class create(Scope scope, Type type, Class base) {
+   private Class create(Type type, Class base) {
       try {
          Class[] interfaces = collector.collect(type);
          ProxyBuilder builder = ProxyBuilder.forClass(base);
