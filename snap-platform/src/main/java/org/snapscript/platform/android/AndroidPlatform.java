@@ -17,28 +17,28 @@ import org.snapscript.platform.generate.BridgeInstance;
 
 public class AndroidPlatform implements Platform {
 
-   private final ProxyBuilderGenerator generator;   
+   private final ProxyClassGenerator generator;   
    private final BridgeConstructorBuilder builder;
-   private final ProxyBuilderWrapper wrapper;
+   private final ProxyInvocationResolver resolver;
    private final InvocationHandler handler;
    private final InvocationRouter router;
-   private final ClassLoader loader;
+   private final ProxyClassLoader loader;
    private final ThreadLocal local;
 
    public AndroidPlatform(FunctionResolver resolver) {
-      this.loader = new ContextClassLoader(Any.class);
       this.router = new InvocationRouter(this, resolver);
       this.local = new ThreadLocal<BridgeInstance>();
       this.handler = new ThreadLocalHandler(local, router);
-      this.generator = new ProxyBuilderGenerator(handler, loader);
+      this.loader = new ProxyClassLoader(handler);
+      this.generator = new ProxyClassGenerator(loader);
       this.builder = new BridgeConstructorBuilder(generator, resolver, local);
-      this.wrapper = new ProxyBuilderWrapper(loader);
+      this.resolver = new ProxyInvocationResolver(loader);
    }
 
    @Override
    public Invocation createSuperConstructor(Type real, Type base) {
       try {
-         return builder.createInvocation(real, base);
+         return builder.createSuperConstructor(real, base);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create super for '" + base + "'", e);
       } 
@@ -47,7 +47,7 @@ public class AndroidPlatform implements Platform {
    @Override
    public Invocation createSuperMethod(Type real, Method method) {
       try {
-         return wrapper.superInvocation(real, method);
+         return resolver.resolveSuperMethod(real, method);
       } catch (Exception e) {
          throw new IllegalStateException("Could not call super for '" + method + "'", e);
       }
@@ -56,7 +56,7 @@ public class AndroidPlatform implements Platform {
    @Override
    public Invocation createMethod(Type real, Method method) {
       try {
-         return wrapper.thisInvocation(method);
+         return resolver.resolveMethod(method);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create adapter for '" + method + "'", e);
       }
@@ -65,7 +65,7 @@ public class AndroidPlatform implements Platform {
    @Override
    public Invocation createConstructor(Type real, Constructor constructor) {
       try {
-         return wrapper.thisInvocation(constructor);
+         return resolver.resolveConstructor(constructor);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create adapter for '" + constructor + "'", e);
       }

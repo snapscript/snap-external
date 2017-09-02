@@ -13,10 +13,10 @@ import org.snapscript.platform.generate.BridgeInstance;
 
 public class StandardPlatform implements Platform {
    
+   private final MethodInvocationResolver resolver;
    private final MethodInterceptorHandler handler;
-   private final EnhancerGenerator generator;
    private final BridgeConstructorBuilder builder;
-   private final MethodProxyWrapper wrapper;
+   private final EnhancerGenerator generator;
    private final InvocationRouter router;
    private final ThreadLocal local;
 
@@ -26,13 +26,13 @@ public class StandardPlatform implements Platform {
       this.handler = new MethodInterceptorHandler(local, router);
       this.generator = new EnhancerGenerator(handler);
       this.builder = new BridgeConstructorBuilder(generator, resolver, local);
-      this.wrapper = new MethodProxyWrapper();
+      this.resolver = new MethodInvocationResolver();
    }
 
    @Override
    public Invocation createSuperConstructor(Type real, Type base) {
       try {
-         return builder.createInvocation(real, base);
+         return builder.createSuperConstructor(real, base);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create super for '" + real + "'", e);
       } 
@@ -41,7 +41,7 @@ public class StandardPlatform implements Platform {
    @Override
    public Invocation createSuperMethod(Type real, Method method) {
       try {
-         return wrapper.superInvocation(real, method);
+         return resolver.resolveSuperMethod(real, method);
       } catch (Exception e) {
          throw new IllegalStateException("Could not call super for '" + method + "'", e);
       }
@@ -50,7 +50,7 @@ public class StandardPlatform implements Platform {
    @Override
    public Invocation createMethod(Type real, Method method) {
       try {
-         return wrapper.thisInvocation(method);
+         return resolver.resolveMethod(method);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create invocation for '" + method + "'", e);
       }
@@ -59,7 +59,7 @@ public class StandardPlatform implements Platform {
    @Override
    public Invocation createConstructor(Type real, Constructor constructor) {
       try {
-         return wrapper.thisInvocation(constructor);
+         return resolver.resolveConstructor(constructor);
       } catch (Exception e) {
          throw new IllegalStateException("Could not create invocation for '" + constructor + "'", e);
       }

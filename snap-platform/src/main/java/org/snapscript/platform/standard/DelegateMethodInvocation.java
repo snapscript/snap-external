@@ -8,11 +8,11 @@ import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 
-public class MethodAdapterInvocation implements Invocation {
+public class DelegateMethodInvocation implements Invocation {
    
    private final Method method;
    
-   public MethodAdapterInvocation(Method method) {
+   public DelegateMethodInvocation(Method method) {
       this.method = method;
    }
 

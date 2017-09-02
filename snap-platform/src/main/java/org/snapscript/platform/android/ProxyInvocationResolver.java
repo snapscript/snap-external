@@ -10,44 +10,44 @@ import org.snapscript.core.function.Invocation;
 import org.snapscript.platform.InvocationCache;
 import org.snapscript.platform.InvocationCacheTable;
 
-public class ProxyBuilderWrapper {
+public class ProxyInvocationResolver {
    
    private final Cache<Object, Invocation> adapters;
    private final InvocationCacheTable table;
-   private final ProxyMethodBuilder builder;
+   private final ProxyInvocationBuilder builder;
 
-   public ProxyBuilderWrapper(ClassLoader loader) {
+   public ProxyInvocationResolver(ProxyClassLoader generator) {
       this.adapters = new CopyOnWriteCache<Object, Invocation>();
-      this.builder = new ProxyMethodBuilder(loader);
+      this.builder = new ProxyInvocationBuilder(generator);
       this.table = new InvocationCacheTable();
    }
 
-   public Invocation superInvocation(Type real, Method method) {
+   public Invocation resolveSuperMethod(Type real, Method method) {
       InvocationCache cache = table.get(real);
       Invocation invocation = cache.fetch(method);
       
       if(invocation == null) {
-         invocation = builder.superInvocation(method);
+         invocation = builder.createSuperMethod(method);
          cache.cache(real, invocation);
       }
       return invocation;
    }
    
-   public Invocation thisInvocation(Method method) {
+   public Invocation resolveMethod(Method method) {
       Invocation invocation = adapters.fetch(method);
       
       if (invocation == null) {
-         invocation = builder.thisInvocation(method);
+         invocation = builder.createMethod(method);
          adapters.cache(method, invocation);
       }
       return invocation;
    }
    
-   public Invocation thisInvocation(Constructor constructor) {
+   public Invocation resolveConstructor(Constructor constructor) {
       Invocation invocation = adapters.fetch(constructor);
       
       if (invocation == null) {
-         invocation = builder.thisInvocation(constructor);
+         invocation = builder.createConstructor(constructor);
          adapters.cache(constructor, invocation);
       }
       return invocation;

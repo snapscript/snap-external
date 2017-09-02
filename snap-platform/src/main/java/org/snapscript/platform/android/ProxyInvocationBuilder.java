@@ -7,25 +7,25 @@ import java.util.concurrent.Executor;
 import org.snapscript.common.thread.ThreadPool;
 import org.snapscript.core.function.Invocation;
 
-public class ProxyMethodBuilder {
+public class ProxyInvocationBuilder {
    
-   private final ProxyAdapterGenerator generator;
+   private final ProxyAdapterBuilder generator;
    private final Executor executor;
 
-   public ProxyMethodBuilder(ClassLoader loader) {
-      this.generator = new ProxyAdapterGenerator(loader);
+   public ProxyInvocationBuilder(ProxyClassLoader generator) {
+      this.generator = new ProxyAdapterBuilder(generator);
       this.executor = new ThreadPool(1);
    }
    
-   public Invocation superInvocation(Method method) {
-      return new ProxyBuilderInvocation(method);
+   public Invocation createSuperMethod(Method method) {
+      return new ProxyMethodSuperInvocation(method);
    }
    
-   public Invocation thisInvocation(Method method) {
+   public Invocation createMethod(Method method) {
       return new ProxyMethodInvocation(generator, method, executor);
    }
    
-   public Invocation thisInvocation(Constructor constructor) {
+   public Invocation createConstructor(Constructor constructor) {
       return new ProxyConstructorInvocation(generator, constructor, executor);
    }
 }

@@ -17,7 +17,7 @@ public class ProxyConstructorInvocation implements Invocation {
    private volatile ProxyAdapter reference;
    private volatile Executor executor;
    
-   public ProxyConstructorInvocation(ProxyAdapterGenerator generator, Constructor constructor, Executor executor) {
+   public ProxyConstructorInvocation(ProxyAdapterBuilder generator, Constructor constructor, Executor executor) {
       this.exchanger = new ConstructorExchanger(generator, constructor);
       this.reference = new ConstructorAdapter(constructor);
       this.executor = executor;
@@ -60,12 +60,12 @@ public class ProxyConstructorInvocation implements Invocation {
    
    private class ConstructorExchanger implements Runnable {
       
-      private final ProxyAdapterGenerator generator;
-      private final ProxyClassFilter filter;
+      private final ProxyAdapterBuilder generator;
+      private final InternalClassFilter filter;
       private final Constructor constructor;
       
-      public ConstructorExchanger(ProxyAdapterGenerator generator, Constructor constructor) {
-         this.filter = new ProxyClassFilter();
+      public ConstructorExchanger(ProxyAdapterBuilder generator, Constructor constructor) {
+         this.filter = new InternalClassFilter();
          this.constructor = constructor;
          this.generator = generator;
       }

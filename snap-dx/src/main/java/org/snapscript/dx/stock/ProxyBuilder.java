@@ -19,7 +19,6 @@ package org.snapscript.dx.stock;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
-import static java.lang.reflect.Modifier.FINAL;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +47,6 @@ import org.snapscript.dx.Label;
 import org.snapscript.dx.Local;
 import org.snapscript.dx.MethodId;
 import org.snapscript.dx.TypeId;
-import org.snapscript.dx.rop.type.Type;
 
 
 /**
@@ -253,58 +251,6 @@ public final class ProxyBuilder<T> {
     }
 
     // TODO: test coverage for this
-    
-    public Class buildMethodAccessor(Method method) throws Exception {
-       DexMaker dexMaker = new DexMaker();
-       Class<? extends T> accessorClass = null;
-       // the cache missed; generate the class
-       String generatedName = getMethodNameForAccessorOf(method);
-       TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
-       TypeId interfaceType = TypeId.get(ProxyAdapter.class);
-       generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
-       generateCodeForAccessor(dexMaker, generatedType, method);
-       dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT,
-            interfaceType);
-       ClassLoader bridgeClassLoader = generatedProxyClassesClassLoaders.get(method.getDeclaringClass());
-       ClassLoader classLoader = dexMaker.generateAndLoad(bridgeClassLoader == null ? parentClassLoader : bridgeClassLoader, dexCache, generatedName);
-       try {
-          accessorClass = loadClass(classLoader, generatedName);
-       } catch (IllegalAccessError e) {
-           // Thrown when the base class is not accessible.
-           throw new UnsupportedOperationException(
-                   "cannot proxy inaccessible class " + baseClass, e);
-       } catch (ClassNotFoundException e) {
-           // Should not be thrown, we're sure to have generated this class.
-           throw new AssertionError(e);
-       }
-       return accessorClass;
-    }
-    
-    public Class buildConstructorAccessor(Constructor constructor) throws Exception {
-       DexMaker dexMaker = new DexMaker();
-       Class<? extends T> accessorClass = null;
-       // the cache missed; generate the class
-       String generatedName = getConstructorNameForAccessorOf(constructor);
-       TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
-       TypeId interfaceType = TypeId.get(ProxyAdapter.class);
-       generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
-       generateCodeForAccessor(dexMaker, generatedType, constructor);
-       dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT,
-            interfaceType);
-       ClassLoader bridgeClassLoader = generatedProxyClassesClassLoaders.get(constructor.getDeclaringClass());
-       ClassLoader classLoader = dexMaker.generateAndLoad(bridgeClassLoader == null ? parentClassLoader : bridgeClassLoader, dexCache, generatedName);
-       try {
-          accessorClass = loadClass(classLoader, generatedName);
-       } catch (IllegalAccessError e) {
-           // Thrown when the base class is not accessible.
-           throw new UnsupportedOperationException(
-                   "cannot proxy inaccessible class " + baseClass, e);
-       } catch (ClassNotFoundException e) {
-           // Should not be thrown, we're sure to have generated this class.
-           throw new AssertionError(e);
-       }
-       return accessorClass;
-    }
 
     /**
      * Generate a proxy class. Note that new instances of this class will not automatically have an
@@ -322,15 +268,16 @@ public final class ProxyBuilder<T> {
                && interfaces.equals(asSet(proxyClass.getInterfaces()))) {
            return proxyClass; // cache hit!
        }
-       BridgeInfo  bridgeInfo = buildBridgeClass( baseClass);
-       return buildProxyClass(bridgeInfo.bridgeClass, bridgeInfo.bridgeClassLoader);
+       Class bridgeClass = buildBridgeClass( baseClass);
+       ClassLoader cacheClassLoader = generatedProxyClassesClassLoaders.get(baseClass);
+       return buildProxyClass(bridgeClass, cacheClassLoader == null ? parentClassLoader : cacheClassLoader);
     }
     
     private Class<? extends T> buildProxyClass(Class baseClass, ClassLoader parentClassLoader) throws IOException {
        DexMaker dexMaker = new DexMaker();
        Class<? extends T> proxyClass = null;
        // the cache missed; generate the class
-       String generatedName = getMethodNameForProxyOf(baseClass);
+       String generatedName = getNameForProxyOf(baseClass);
        TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
        TypeId<T> superType = TypeId.get(baseClass);
        generateConstructorsAndFields(dexMaker, generatedType, superType, baseClass);
@@ -356,11 +303,11 @@ public final class ProxyBuilder<T> {
        return proxyClass;
     }
     
-    private BridgeInfo buildBridgeClass(Class baseClass) throws IOException {
+    private Class buildBridgeClass(Class baseClass) throws IOException {
        DexMaker dexMaker = new DexMaker();
        // the cache missed; generate the class
        Class<? extends T> proxyClass = null;
-       String generatedName = getMethodNameForBridgeOf(baseClass);
+       String generatedName = getNameForBridgeOf(baseClass);
        TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
        TypeId<T> superType = TypeId.get(baseClass);
        generateConstructorsForBridge(dexMaker, generatedType, superType, baseClass);
@@ -383,18 +330,8 @@ public final class ProxyBuilder<T> {
        }
        generatedProxyClasses.put(baseClass, proxyClass);
        generatedProxyClassesClassLoaders.put(proxyClass, classLoader);
-       return new BridgeInfo(proxyClass, classLoader);
+       return proxyClass;
    }
-    
-    public static class BridgeInfo{
-       Class bridgeClass;
-       ClassLoader bridgeClassLoader;
-       
-       public BridgeInfo(Class bridgeClass, ClassLoader bridgeClassLoader){
-          this.bridgeClass = bridgeClass;
-          this.bridgeClassLoader = bridgeClassLoader;
-       }
-    }
 
     // The type cast is safe: the generated type will extend the base class type.
     @SuppressWarnings("unchecked")
@@ -488,190 +425,6 @@ public final class ProxyBuilder<T> {
             return false;
         }
     }
-    
-    
-    
-    private static <T, G extends T> void generateCodeForAccessor(DexMaker dexMaker,
-          TypeId<G> generatedType, Method accessorMethod) {
-       int modifiers = accessorMethod.getModifiers();
-       String name = accessorMethod.getName();
-       Class declaringClass = accessorMethod.getDeclaringClass();
-       Class<?>[] argClasses = accessorMethod.getParameterTypes();
-       Class<?> returnClass = accessorMethod.getReturnType();
-       TypeId<Object[]> objectArrayType = TypeId.get(Object[].class);
-       TypeId<Object> objectType = TypeId.get(Object.class);
-       TypeId instanceType = TypeId.get(declaringClass);
-       TypeId[] argTypes = new TypeId[argClasses.length];
-       Local[] argumentHolders = new Local[argTypes.length];
-       Local[] boxedParameterHolder = new Local[argTypes.length];
-       Local[] realParameterHolders = new Local[argTypes.length];
-       for (int i = 0; i < argTypes.length; ++i) {
-           argTypes[i] = TypeId.get(argClasses[i]);
-       }
-       TypeId returnType = TypeId.get(returnClass);
-       MethodId methodToGenerate = generatedType.getMethod(objectType, "invoke", objectType, objectArrayType); // public Object invoke(Object targetObject, Object[] argumentarray)
-       MethodId methodToInvoke = instanceType.getMethod(returnType, name, argTypes);
-       Code code = dexMaker.declare(methodToGenerate, PUBLIC | FINAL);
-    
-       /*
-        *  The code generated basically casts the object and the arguments
-        *  and then invoke the type, we need to make sure this is public
-        * 
-        *  // List.get(int): Object
-        * 
-        *  public Object invoke(Object object, Object[] arguments) {
-        *     List instance;
-        *     Object ret;
-        *     Object result;
-        *     Object argument;
-        *     Integer boxed;
-        *     int real;
-        *     
-        *     argument = arguments[0];
-        *     boxed = (Integer)argument;
-        *     real = boxed.intValue();
-        *     instance = (List)object;
-        *     result = instance.get(real);
-        *     ret = (Object)result;
-        *     
-        *     return ret;
-        *  }
-        */
-
-       Local temp = code.newLocal(TypeId.OBJECT); // Object ret
-       Local targetObject = code.getParameter(0, TypeId.OBJECT);
-       Local argumentArray = code.getParameter(1, objectArrayType);
-       Local<Integer> intValue = code.newLocal(TypeId.INT); // declare int to index argumentValues
-       Local returnValue = code.newLocal(TypeId.OBJECT); // Object ret
-       Local resultHolder = null; 
-       Local instanceHolder = null;
-       
-       if(returnClass != void.class) {
-          resultHolder = code.newLocal(returnType);
-       }
-       if(!Modifier.isStatic(modifiers)) {
-          instanceHolder = code.newLocal(instanceType); // ObjectToInvoke target
-       }
-       for (int p = 0; p < argTypes.length; ++p) {
-          argumentHolders[p] = code.newLocal(objectType); // Object element
-          Class boxedType = PRIMITIVE_TO_BOXED.get(argClasses[p]);
-          
-          if(boxedType != null) {
-             boxedParameterHolder[p] = code.newLocal(TypeId.get(boxedType));
-             realParameterHolders[p] = code.newLocal(argTypes[p]);  // the primitive type
-          } else {
-             boxedParameterHolder[p] = code.newLocal(argTypes[p]); // MyObject local
-             realParameterHolders[p] = boxedParameterHolder[p];
-          }
-       }
-       for (int p = 0; p < argTypes.length; ++p) {
-           code.loadConstant(intValue, p); // i = 0
-           code.aget(argumentHolders[p], argumentArray, intValue); // element = arguments[i]
- 
-           if (PRIMITIVE_TO_UNBOX_METHOD.containsKey(argClasses[p])) {
-              code.cast(boxedParameterHolder[p], argumentHolders[p]); //  x = (Integer)element
-              MethodId unboxingMethodFor = getUnboxMethodForPrimitive(argClasses[p]);
-              code.invokeVirtual(unboxingMethodFor, realParameterHolders[p], boxedParameterHolder[p]);
-           } else {
-              code.cast(realParameterHolders[p], argumentHolders[p]); // local = (MyObject)element;
-          }
-       }
-       if(Modifier.isStatic(modifiers)) {
-          code.invokeStatic(methodToInvoke, resultHolder, realParameterHolders);
-       } else if(declaringClass.isInterface()){
-          code.cast(instanceHolder, targetObject); // target = (ObjectToInvoke)object
-          code.invokeInterface(methodToInvoke, resultHolder, instanceHolder, realParameterHolders);
-       } else {
-          code.cast(instanceHolder, targetObject); // target = (ObjectToInvoke)object
-          code.invokeVirtual(methodToInvoke, resultHolder, instanceHolder, realParameterHolders);
-       } 
-       if(returnClass != void.class) {
-          Local boxedIfNecessary = boxIfRequired(code, resultHolder, temp);
-          code.cast(returnValue, boxedIfNecessary); // ret = (Object)result
-       } else {
-          code.loadConstant(returnValue, null); // return null
-       }
-       code.returnValue(returnValue); // return ret
-    }
-    
-    private static <T, G extends T> void generateCodeForAccessor(DexMaker dexMaker,
-          TypeId<G> generatedType, Constructor accessorConstructor) {
-       Class declaringClass = accessorConstructor.getDeclaringClass();
-       Class<?>[] argClasses = accessorConstructor.getParameterTypes();
-       Class<?> returnClass = declaringClass;
-       TypeId<Object[]> objectArrayType = TypeId.get(Object[].class);
-       TypeId<Object> objectType = TypeId.get(Object.class);
-       TypeId instanceType = TypeId.get(declaringClass);
-       TypeId[] argTypes = new TypeId[argClasses.length];
-       Local[] argumentHolders = new Local[argTypes.length];
-       Local[] boxedParameterHolder = new Local[argTypes.length];
-       Local[] realParameterHolders = new Local[argTypes.length];
-       for (int i = 0; i < argTypes.length; ++i) {
-           argTypes[i] = TypeId.get(argClasses[i]);
-       }
-       TypeId returnType = TypeId.get(returnClass);
-       MethodId methodToGenerate = generatedType.getMethod(objectType, "invoke", objectType, objectArrayType); // public Object invoke(Object targetObject, Object[] argumentarray)
-       MethodId constructorToInvoke = instanceType.getConstructor(argTypes);
-       Code code = dexMaker.declare(methodToGenerate, PUBLIC);
-    
-       /*
-        *  The code generated basically casts the object and the arguments
-        *  and then invoke the type, we need to make sure this is public
-        * 
-        *  // new ArrayList(int): ArrayList
-        * 
-        *  public Object invoke(Object ignore, Object[] arguments) {
-        *     List instance;
-        *     Object ret;
-        *     Object result;
-        *     Object argument;
-        *     Integer boxed;
-        *     int real;
-        *     
-        *     argument = arguments[0];
-        *     boxed = (Integer)argument;
-        *     real = boxed.intValue();
-        *     result = new ArrayList(real);
-        *     ret = (ArrayList)result;
-        *     
-        *     return ret;
-        *  }
-        */
-
-       Local argumentArray = code.getParameter(1, objectArrayType);
-       Local<Integer> intValue = code.newLocal(TypeId.INT); // declare int to index argumentValues
-       Local returnValue = code.newLocal(TypeId.OBJECT); // Object ret
-       Local resultHolder = code.newLocal(returnType); 
-       
-       for (int p = 0; p < argTypes.length; ++p) {
-          argumentHolders[p] = code.newLocal(objectType); // Object element
-          Class boxedType = PRIMITIVE_TO_BOXED.get(argClasses[p]);
-          
-          if(boxedType != null) {
-             boxedParameterHolder[p] = code.newLocal(TypeId.get(boxedType));
-             realParameterHolders[p] = code.newLocal(argTypes[p]);  // the primitive type
-          } else {
-             boxedParameterHolder[p] = code.newLocal(argTypes[p]); // MyObject local
-             realParameterHolders[p] = boxedParameterHolder[p];
-          }
-       }
-       for (int p = 0; p < argTypes.length; ++p) {
-           code.loadConstant(intValue, p); // i = 0
-           code.aget(argumentHolders[p], argumentArray, intValue); // element = arguments[i]
- 
-           if (PRIMITIVE_TO_UNBOX_METHOD.containsKey(argClasses[p])) {
-              code.cast(boxedParameterHolder[p], argumentHolders[p]); //  x = (Integer)element
-              MethodId unboxingMethodFor = getUnboxMethodForPrimitive(argClasses[p]);
-              code.invokeVirtual(unboxingMethodFor, realParameterHolders[p], boxedParameterHolder[p]);
-           } else {
-              code.cast(realParameterHolders[p], argumentHolders[p]); // local = (MyObject)element;
-          }
-       }
-       code.newInstance(resultHolder, constructorToInvoke, realParameterHolders);
-       code.cast(returnValue, resultHolder); // ret = (Object)result
-       code.returnValue(returnValue); // return ret
-    }
-    
     
     private static <T, G extends T> void generateCodeForAbstractMethods(DexMaker dexMaker, Method[] methodsToImplement, 
           TypeId<G> generatedType) {
@@ -976,15 +729,6 @@ public final class ProxyBuilder<T> {
         }
     }
     
-    private static <T, G extends T> void generateConstructorsForAccessor(DexMaker dexMaker,
-          TypeId<G> generatedType, TypeId<T> superType) {
-       MethodId<?, ?> method = generatedType.getConstructor();
-       Code constructorCode = dexMaker.declare(method, PUBLIC); // declare constructor 
-       Local<G> thisRef = constructorCode.getThis(generatedType);
-       constructorCode.invokeDirect(TypeId.OBJECT.getConstructor(), null, thisRef);
-       constructorCode.returnVoid();
-    }
-    
     private static <T, G extends T> void generateConstructorsForBridge(DexMaker dexMaker,
           TypeId<G> generatedType, TypeId<T> superType, Class<T> superClass) {
       for (Constructor<T> constructor : getConstructorsToOverwrite(superClass)) {
@@ -1174,66 +918,40 @@ public final class ProxyBuilder<T> {
         }
     }
 
-    private static <T> String getMethodNameForProxyOf(Class<T> clazz) {
-        return clazz.getSimpleName() + "_Proxy";
+    private static <T> String getNameForProxyOf(Class<T> clazz) {
+        return generateNameDigest(clazz, "Proxy");
     }
     
-    private static <T> String getMethodNameForBridgeOf(Class<T> clazz) {
-       return clazz.getSimpleName() + "_Bridge";
+    private static <T> String getNameForBridgeOf(Class<T> clazz) {
+       return generateNameDigest(clazz, "Bridge");
     }
     
-    private static <T> String getMethodNameForAccessorOf(Method method) {
+    private static <T> String generateNameDigest(Class<T> clazz, String suffix) {
        try {
-          String name = method.getName();
-          String type = method.getDeclaringClass().getSimpleName();
-          String source = method.toString();
+          String name = clazz.getSimpleName();
+          String source = clazz.toString();
           byte[] data = source.getBytes();
           MessageDigest digest = MessageDigest.getInstance("MD5");
           byte[] octets = digest.digest(data);
 
           StringBuilder builder = new StringBuilder();
-          builder.append(type);
-          builder.append("_");
           builder.append(name);
           builder.append("_");
-          
-          for (int i = 0; i < octets.length; i++) {
-             int value = (octets[i] & 0xff) + 0x100;
-             String code = Integer.toString(value, 16);
-             String token = code.substring(1);
-             
-             builder.append(token);
-          }
-          return builder.toString();
-       }catch(Exception e) {
-          throw new IllegalStateException("Unable to generate name for " + method, e);
-       }
-   }
-    
-    private static <T> String getConstructorNameForAccessorOf(Constructor constructor) {
-       try {
-          String type = constructor.getDeclaringClass().getSimpleName();
-          String source = constructor.toString();
-          byte[] data = source.getBytes();
-          MessageDigest digest = MessageDigest.getInstance("MD5");
-          byte[] octets = digest.digest(data);
+          builder.append(suffix);
+          builder.append("_");
 
-          StringBuilder builder = new StringBuilder();
-          builder.append(type);
-          builder.append("_new_");
-          
           for (int i = 0; i < octets.length; i++) {
              int value = (octets[i] & 0xff) + 0x100;
              String code = Integer.toString(value, 16);
              String token = code.substring(1);
-             
+
              builder.append(token);
           }
           return builder.toString();
-       }catch(Exception e) {
-          throw new IllegalStateException("Unable to generate name for " + constructor, e);
+       } catch (Exception e) {
+          throw new IllegalStateException("Unable to generate name for " + clazz, e);
        }
-   }
+    }
 
     private static TypeId<?>[] classArrayToTypeArray(Class<?>[] input) {
         TypeId<?>[] result = new TypeId[input.length];

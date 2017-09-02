@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.snapscript.core.Bug;
 import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Result;
 import org.snapscript.core.ResultType;
@@ -18,7 +17,7 @@ public class ProxyMethodInvocation implements Invocation {
    private volatile ProxyAdapter reference;
    private volatile Executor executor;
    
-   public ProxyMethodInvocation(ProxyAdapterGenerator generator, Method method, Executor executor) {
+   public ProxyMethodInvocation(ProxyAdapterBuilder generator, Method method, Executor executor) {
       this.exchanger = new MethodExchanger(generator, method);
       this.reference = new MethodAdapter(method);
       this.executor = executor;
@@ -61,12 +60,12 @@ public class ProxyMethodInvocation implements Invocation {
    
    private class MethodExchanger implements Runnable {
       
-      private final ProxyAdapterGenerator generator;
-      private final ProxyClassFilter filter;
+      private final ProxyAdapterBuilder generator;
+      private final InternalClassFilter filter;
       private final Method method;
       
-      public MethodExchanger(ProxyAdapterGenerator generator, Method method) {
-         this.filter = new ProxyClassFilter();
+      public MethodExchanger(ProxyAdapterBuilder generator, Method method) {
+         this.filter = new InternalClassFilter();
          this.generator = generator;
          this.method = method;
       }

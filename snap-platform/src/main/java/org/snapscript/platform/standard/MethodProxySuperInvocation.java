@@ -10,12 +10,12 @@ import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 
-public class MethodProxyInvocation implements Invocation {
+public class MethodProxySuperInvocation implements Invocation {
    
    private final Cache<Class, MethodProxy> cache;
    private final Signature signature;
    
-   public MethodProxyInvocation(Signature signature) {
+   public MethodProxySuperInvocation(Signature signature) {
       this.cache = new CopyOnWriteCache<Class, MethodProxy>();
       this.signature = signature;
    }

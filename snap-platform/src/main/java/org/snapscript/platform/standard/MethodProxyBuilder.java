@@ -14,13 +14,13 @@ public class MethodProxyBuilder {
       this.empty = new Type[] {};
    }
    
-   public Invocation createInvocation(Method method) {
+   public Invocation createSuperMethod(Method method) {
       String name = method.getName();
       Class returns = method.getReturnType();
       Class[] parameters = method.getParameterTypes();
       Signature signature = createSignature(name, returns, parameters);
       
-      return new MethodProxyInvocation(signature);
+      return new MethodProxySuperInvocation(signature);
    }
    
    public Signature createSignature(String name, Class returns, Class[] parameters) {

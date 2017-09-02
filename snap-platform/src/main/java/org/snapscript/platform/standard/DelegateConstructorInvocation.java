@@ -8,11 +8,11 @@ import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 
-public class ConstructorAdapterInvocation implements Invocation {
+public class DelegateConstructorInvocation implements Invocation {
    
    private final Constructor constructor;
    
-   public ConstructorAdapterInvocation(Constructor constructor) {
+   public DelegateConstructorInvocation(Constructor constructor) {
       this.constructor = constructor;
    }
 

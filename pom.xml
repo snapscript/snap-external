@@ -30,7 +30,7 @@
    <modules>
            <module>snap-cglib</module>
            <module>snap-asm</module>
-           <module>snap-dexmaker</module>
+           <module>snap-dx</module>
            <module>snap-platform</module>
 	</modules>
 

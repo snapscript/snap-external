@@ -10,9 +10,9 @@ import org.snapscript.core.Evaluation;
 import org.snapscript.core.Statement;
 import org.snapscript.core.platform.Bridge;
 
-public class ProxyClassFilter {
+public class InternalClassFilter {
    
-   public ProxyClassFilter(){
+   public InternalClassFilter(){
       super();
    }
    

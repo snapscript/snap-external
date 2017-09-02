@@ -9,11 +9,11 @@ import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.dx.stock.ProxyBuilder;
 
-public class ProxyBuilderInvocation implements Invocation {
+public class ProxyMethodSuperInvocation implements Invocation {
    
    private final Method method;
    
-   public ProxyBuilderInvocation(Method method) {
+   public ProxyMethodSuperInvocation(Method method) {
       this.method = method;
    }
 

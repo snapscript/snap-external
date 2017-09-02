@@ -19,7 +19,7 @@ public class BridgeConstructorBuilder {
       this.local = local;
    }
    
-   public Invocation createInvocation(Type real, Type base) {
+   public Invocation createSuperConstructor(Type real, Type base) {
       return new BridgeInvocation(real, base);
    }
    
