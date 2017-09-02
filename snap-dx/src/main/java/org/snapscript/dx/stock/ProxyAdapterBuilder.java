@@ -90,6 +90,7 @@ public final class ProxyAdapterBuilder<T> {
       if (accessorClass == null) {
          DexMaker dexMaker = new DexMaker();
          // the cache missed; generate the class
+         String generatedName = getNameForAccessorOf(method);
          TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
          TypeId interfaceType = TypeId.get(ProxyAdapter.class);
          generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
@@ -115,6 +116,7 @@ public final class ProxyAdapterBuilder<T> {
       if (accessorClass == null) {
          DexMaker dexMaker = new DexMaker();
          // the cache missed; generate the class
+         String generatedName = getNameForAccessorOf(constructor);
          TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
          TypeId interfaceType = TypeId.get(ProxyAdapter.class);
          generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
@@ -336,6 +338,7 @@ public final class ProxyAdapterBuilder<T> {
       constructorCode.returnVoid();
    }
 
+   private static <T> String getNameForAccessorOf(Method method) {
       try {
          String name = method.getName();
          String type = method.getDeclaringClass().getSimpleName();
@@ -363,6 +366,7 @@ public final class ProxyAdapterBuilder<T> {
       }
    }
 
+   private static <T> String getNameForAccessorOf(Constructor constructor) {
       try {
          String type = constructor.getDeclaringClass().getSimpleName();
          String source = constructor.toString();
