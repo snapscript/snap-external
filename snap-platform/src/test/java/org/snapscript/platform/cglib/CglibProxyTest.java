@@ -52,7 +52,7 @@ public class CglibProxyTest extends TestCase {
             return proxy.invokeSuper(obj, args);
          }
       });
-      Object proxy = (Object) enhancer.create();
+      Object proxy = enhancer.create();
       System.err.println(proxy);
    }
 }

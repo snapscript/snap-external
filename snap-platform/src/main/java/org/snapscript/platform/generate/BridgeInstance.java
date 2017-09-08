@@ -1,10 +1,13 @@
 package org.snapscript.platform.generate;
 
+import org.snapscript.core.ArrayTable;
+import org.snapscript.core.Index;
+import org.snapscript.core.StackIndex;
 import org.snapscript.core.MapState;
-import org.snapscript.core.Model;
 import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.State;
+import org.snapscript.core.Table;
 import org.snapscript.core.Type;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.platform.Bridge;
@@ -13,12 +16,16 @@ public class BridgeInstance implements Instance {
 
    private final BridgeHolder holder;
    private final Module module;
+   private final Index index;
+   private final Table table;
    private final State state;
    private final Type real;
    private final Type base;
 
    public BridgeInstance(BridgeHolder holder, Module module, Scope scope, Type real, Type base) {
-      this.state = new MapState(null, scope);
+      this.state = new MapState(scope);
+      this.table = new ArrayTable();
+      this.index = new StackIndex();
       this.holder = holder;
       this.module = module;
       this.real = real;
@@ -35,12 +42,22 @@ public class BridgeInstance implements Instance {
    }
 
    @Override
-   public Instance getInner() {
+   public Index getIndex() {
+      return index;
+   }
+   
+   @Override
+   public Table getTable(){
+      return table;
+   }
+   
+   @Override
+   public Instance getStack() {
       return this;
    }
 
    @Override
-   public Instance getOuter() {
+   public Instance getScope() {
       return this;
    }
 
@@ -66,11 +83,6 @@ public class BridgeInstance implements Instance {
    @Override
    public State getState() {
       return state;
-   }
-
-   @Override
-   public Model getModel() {
-      return null;
    }
 
    @Override

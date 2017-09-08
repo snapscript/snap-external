@@ -28,7 +28,7 @@ public class TestSuiteTest extends TestCase {
       Context context = new StoreContext(store, null);
       assertTrue("Test suite directory not found: " +file.getCanonicalPath(), file.exists());
       Compiler compiler = new StringCompiler(context);
-      String source = SOURCE.format(SOURCE, file.getCanonicalPath().replace(""+File.separatorChar,"\\"+File.separatorChar));
+      String source = String.format(SOURCE, file.getCanonicalPath().replace(""+File.separatorChar,"\\"+File.separatorChar));
       System.err.println(source);
       Executable executable = compiler.compile(source);
       executable.execute();

@@ -7,7 +7,6 @@ import java.util.List;
 import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
-import org.snapscript.core.ValueType;
 import org.snapscript.core.property.Property;
 
 public class BridgeInstanceConverter {
@@ -17,7 +16,7 @@ public class BridgeInstanceConverter {
    }
 
    public void convert(BridgeInstance instance) {
-      Value self = ValueType.getReference(instance);
+      Value self = Value.getReference(instance);
       Type base = instance.getBase(); // this might be the wrong type
       List<Type> types = base.getTypes();
       State state = instance.getState();

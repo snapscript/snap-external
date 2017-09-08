@@ -6,7 +6,6 @@ import junit.framework.TestCase;
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
 import org.snapscript.core.Context;
-import org.snapscript.core.Result;
 import org.snapscript.core.Type;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
@@ -33,8 +32,7 @@ public class BridgeBuilderTest extends TestCase {
 
       Platform builder = provider.create();
       Invocation invocation = builder.createSuperConstructor(type, panel);
-      Result result = invocation.invoke(null, null);
-      Instance instance = result.getValue();
+      Instance instance = (Instance)invocation.invoke(null, null);
       
       assertEquals(instance.getBridge().getClass().getSuperclass().getName(), "javax.swing.JPanel");
    }

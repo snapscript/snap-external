@@ -1,7 +1,5 @@
 package org.snapscript.platform.generate;
 
-import org.snapscript.core.Result;
-import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
@@ -34,7 +32,7 @@ public class BridgeConstructorBuilder {
       }
 
       @Override
-      public Result invoke(Scope scope, Object object, Object... list) throws Exception {
+      public Object invoke(Scope scope, Object object, Object... list) throws Exception {
          BridgeInstance instance = builder.createInstance(real, base, list);
 
          try{
@@ -44,7 +42,7 @@ public class BridgeConstructorBuilder {
          } finally {
             local.set(null);
          }
-         return ResultType.getNormal(instance);
+         return instance;
       }
    }
 }

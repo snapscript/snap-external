@@ -5,8 +5,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.snapscript.core.InternalStateException;
-import org.snapscript.core.Result;
-import org.snapscript.core.ResultType;
 import org.snapscript.core.Scope;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.dx.stock.ProxyAdapter;
@@ -24,10 +22,9 @@ public class ProxyConstructorInvocation implements Invocation {
    }
 
    @Override
-   public Result invoke(Scope scope, Object value, Object... arguments) {
+   public Object invoke(Scope scope, Object value, Object... arguments) {
       try {
-         Object result = reference.invoke(value, arguments);
-         return ResultType.getNormal(result);
+         return reference.invoke(value, arguments);
       }catch(Throwable e) {
          throw new InternalStateException("Could not invoke super", e);
       }

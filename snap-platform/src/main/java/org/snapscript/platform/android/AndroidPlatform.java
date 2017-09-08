@@ -4,8 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.snapscript.core.Any;
-import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.function.Invocation;

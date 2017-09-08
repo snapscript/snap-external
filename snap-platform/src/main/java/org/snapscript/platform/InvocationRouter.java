@@ -6,9 +6,9 @@ import java.util.concurrent.Callable;
 import org.snapscript.core.Context;
 import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Module;
-import org.snapscript.core.Result;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
+import org.snapscript.core.Value;
 import org.snapscript.core.bind.FunctionBinder;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.convert.ProxyWrapper;
@@ -40,11 +40,10 @@ public class InvocationRouter {
       
       if(owner != Bridge.class) {
          Invocation invocation = bind(bridge, instance, method, list);
-         Result result = invocation.invoke(scope, bridge, list);
+         Object value = invocation.invoke(scope, bridge, list);
          Module module = scope.getModule();
          Context context = module.getContext();
          ProxyWrapper wrapper = context.getWrapper();
-         Object value = result.getValue();
          Class returns = method.getReturnType();
          
          if(returns != void.class) {
@@ -70,7 +69,7 @@ public class InvocationRouter {
       Module module = scope.getModule();
       Context context = module.getContext();
       FunctionBinder binder = context.getBinder();
-      Callable<Result> call = binder.bind(scope, scope, name, list);
+      Callable<Value> call = binder.bind(scope, scope, name, list);
       
       if (call == null) {
          return builder.createSuperMethod(type, method);
@@ -81,15 +80,18 @@ public class InvocationRouter {
    
    private static class CallableInvocation implements Invocation {
 
-      private final Callable<Result> call;
+      private final Callable<Value> call;
       
-      public CallableInvocation(Callable<Result> call) {
+      public CallableInvocation(Callable<Value> call) {
          this.call = call;
       }
       
       @Override
-      public Result invoke(Scope scope, Object object, Object... list) throws Exception {
-         return call.call();
+      public Object invoke(Scope scope, Object object, Object... list) throws Exception {
+         Value value = call.call();
+         Object result = value.getValue();
+         
+         return result;
       }
       
    }
