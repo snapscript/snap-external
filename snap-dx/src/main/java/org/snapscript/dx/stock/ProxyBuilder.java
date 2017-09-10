@@ -269,7 +269,7 @@ public final class ProxyBuilder<T> {
            return proxyClass; // cache hit!
        }
        Class bridgeClass = buildBridgeClass( baseClass);
-       ClassLoader cacheClassLoader = generatedProxyClassesClassLoaders.get(baseClass);
+       ClassLoader cacheClassLoader = generatedProxyClassesClassLoaders.get(bridgeClass);
        return buildProxyClass(bridgeClass, cacheClassLoader == null ? parentClassLoader : cacheClassLoader);
     }
     
@@ -306,7 +306,7 @@ public final class ProxyBuilder<T> {
     private Class buildBridgeClass(Class baseClass) throws IOException {
        DexMaker dexMaker = new DexMaker();
        // the cache missed; generate the class
-       Class<? extends T> proxyClass = null;
+       Class<? extends T> bridgeClass = null;
        String generatedName = getNameForBridgeOf(baseClass);
        TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
        TypeId<T> superType = TypeId.get(baseClass);
@@ -319,7 +319,7 @@ public final class ProxyBuilder<T> {
                getInterfacesAsTypeIds(beanInterfaces));
        ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
        try {
-           proxyClass = loadClass(classLoader, generatedName);
+           bridgeClass = loadClass(classLoader, generatedName);
        } catch (IllegalAccessError e) {
            // Thrown when the base class is not accessible.WW
            throw new UnsupportedOperationException(
@@ -328,9 +328,8 @@ public final class ProxyBuilder<T> {
            // Should not be thrown, we're sure to have generated this class.
            throw new AssertionError(e);
        }
-       generatedProxyClasses.put(baseClass, proxyClass);
-       generatedProxyClassesClassLoaders.put(proxyClass, classLoader);
-       return proxyClass;
+       generatedProxyClassesClassLoaders.put(bridgeClass, classLoader);
+       return bridgeClass;
    }
 
     // The type cast is safe: the generated type will extend the base class type.
