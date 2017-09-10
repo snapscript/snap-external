@@ -415,7 +415,7 @@ public final class DexMaker {
         File result = new File(dexCache, generateFileName(generatedName));
         // Check that the file exists. If it does, return a DexClassLoader and skip all
         // the dex bytecode generation.
-        if (result.exists()) {
+        if (result.exists() && result.length() > 0) {
             return generateClassLoader(result, dexCache, parent);
         }
 
