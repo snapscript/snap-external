@@ -85,55 +85,65 @@ public final class ProxyAdapterBuilder<T> {
    // TODO: test coverage for this
 
    public Class buildAccessor(Method method) throws Exception {
-      Class accessorClass = generatedAccessorClasses.get(method);
-
-      if (accessorClass == null) {
-         DexMaker dexMaker = new DexMaker();
-         // the cache missed; generate the class
-         String generatedName = getNameForAccessorOf(method);
-         TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
-         TypeId interfaceType = TypeId.get(ProxyAdapter.class);
-         generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
-         generateCodeForAccessor(dexMaker, generatedType, method);
-         dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT, interfaceType);
-         ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
-         try {
-            accessorClass = loadClass(classLoader, generatedName);
-         } catch (IllegalAccessError e) {
-            // Thrown when the base class is not accessible.
-            throw new UnsupportedOperationException("cannot proxy inaccessible class " + baseClass, e);
-         } catch (ClassNotFoundException e) {
-            // Should not be thrown, we're sure to have generated this class.
-            throw new AssertionError(e);
+      Method accessibleMethod = getAccessibleMethod(method);
+      
+      if(accessibleMethod != null) {
+         Class accessorClass = generatedAccessorClasses.get(accessibleMethod);
+   
+         if (accessorClass == null) {
+            DexMaker dexMaker = new DexMaker();
+            // the cache missed; generate the class
+            String generatedName = getNameForAccessorOf(accessibleMethod);
+            TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
+            TypeId interfaceType = TypeId.get(ProxyAdapter.class);
+            generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
+            generateCodeForAccessor(dexMaker, generatedType, accessibleMethod);
+            dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT, interfaceType);
+            ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
+            try {
+               accessorClass = loadClass(classLoader, generatedName);
+            } catch (IllegalAccessError e) {
+               // Thrown when the base class is not accessible.
+               throw new UnsupportedOperationException("cannot proxy inaccessible class " + baseClass, e);
+            } catch (ClassNotFoundException e) {
+               // Should not be thrown, we're sure to have generated this class.
+               throw new AssertionError(e);
+            }
          }
+         return accessorClass;
       }
-      return accessorClass;
+      return null;
    }
 
    public Class buildAccessor(Constructor constructor) throws Exception {
-      Class accessorClass = generatedAccessorClasses.get(constructor);
-
-      if (accessorClass == null) {
-         DexMaker dexMaker = new DexMaker();
-         // the cache missed; generate the class
-         String generatedName = getNameForAccessorOf(constructor);
-         TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
-         TypeId interfaceType = TypeId.get(ProxyAdapter.class);
-         generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
-         generateCodeForAccessor(dexMaker, generatedType, constructor);
-         dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT, interfaceType);
-         ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
-         try {
-            accessorClass = loadClass(classLoader, generatedName);
-         } catch (IllegalAccessError e) {
-            // Thrown when the base class is not accessible.
-            throw new UnsupportedOperationException("cannot proxy inaccessible class " + baseClass, e);
-         } catch (ClassNotFoundException e) {
-            // Should not be thrown, we're sure to have generated this class.
-            throw new AssertionError(e);
+      Constructor accessibleConstructor = getAccessibleConstructor(constructor);
+      
+      if(accessibleConstructor != null) {
+         Class accessorClass = generatedAccessorClasses.get(accessibleConstructor);
+   
+         if (accessorClass == null) {
+            DexMaker dexMaker = new DexMaker();
+            // the cache missed; generate the class
+            String generatedName = getNameForAccessorOf(accessibleConstructor);
+            TypeId<? extends T> generatedType = TypeId.get("L" + generatedName + ";");
+            TypeId interfaceType = TypeId.get(ProxyAdapter.class);
+            generateConstructorsForAccessor(dexMaker, generatedType, TypeId.OBJECT); // generate default no arg
+            generateCodeForAccessor(dexMaker, generatedType, accessibleConstructor);
+            dexMaker.declare(generatedType, generatedName + ".generated", PUBLIC | FINAL, TypeId.OBJECT, interfaceType);
+            ClassLoader classLoader = dexMaker.generateAndLoad(parentClassLoader, dexCache, generatedName);
+            try {
+               accessorClass = loadClass(classLoader, generatedName);
+            } catch (IllegalAccessError e) {
+               // Thrown when the base class is not accessible.
+               throw new UnsupportedOperationException("cannot proxy inaccessible class " + baseClass, e);
+            } catch (ClassNotFoundException e) {
+               // Should not be thrown, we're sure to have generated this class.
+               throw new AssertionError(e);
+            }
          }
+         return accessorClass;
       }
-      return accessorClass;
+      return null;
    }
 
    // The type cast is safe: the generated type will extend the base class type.
@@ -389,6 +399,75 @@ public final class ProxyAdapterBuilder<T> {
       } catch (Exception e) {
          throw new IllegalStateException("Unable to generate name for " + constructor, e);
       }
+   }
+   
+   private static Constructor getAccessibleConstructor(Constructor constructor) {
+      Class type = constructor.getDeclaringClass();
+      int typeModifiers = type.getModifiers();
+      int constructorModifiers = type.getModifiers();
+
+      if(!Modifier.isPublic(constructorModifiers) || !Modifier.isPublic(typeModifiers)) {
+         return null;
+      }
+      return constructor;
+   }
+   
+   private static Method getAccessibleMethod(Method method) {
+      Class type = method.getDeclaringClass();
+      Class[] methodParameters = method.getParameterTypes();
+      String methodName = method.getName();
+      int typeModifiers = type.getModifiers();
+      int methodModifiers = type.getModifiers();
+
+      if(!Modifier.isPublic(methodModifiers)) {
+         return null;
+      }
+      if(!Modifier.isPublic(typeModifiers)) {
+         while(type != null) {
+            Class[] interfaceTypes = type.getInterfaces();
+            
+            for(int i = 0; i < interfaceTypes.length; i++) {
+               Class interfaceType = interfaceTypes[i];
+               int interfaceModifiers = interfaceType.getModifiers();
+               
+               if(Modifier.isPublic(interfaceModifiers)) {
+                  Method[] interfaceMethods = interfaceType.getDeclaredMethods();
+               
+                  for(int j = 0; j < interfaceMethods.length; j++){
+                     Method interfaceMethod = interfaceMethods[j];
+                     Class[] interfaceParameters = interfaceMethod.getParameterTypes();
+                     String interfaceMethodName = interfaceMethod.getName();
+                    
+                     if(interfaceParameters.length == methodParameters.length) {
+                        if(methodName.equals(interfaceMethodName)) {
+                           if(isTypeArrayEqual(interfaceParameters, methodParameters)) {
+                              return interfaceMethod;
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            type = type.getSuperclass();
+         }
+         return null;
+      }
+      return method;
+   }
+   
+   private static boolean isTypeArrayEqual(Class[] interfaceParameters, Class[] methodParameters) {
+      if(interfaceParameters.length != methodParameters.length) {
+         return false;
+      }
+      for(int i = 0; i < interfaceParameters.length; i++){
+         Class interfaceParameter = interfaceParameters[i];
+         Class methodParameter = methodParameters[i];
+         
+         if(interfaceParameter != methodParameter) {
+            return false;
+         }
+      }
+      return true;
    }
 
    private static MethodId<?, ?> getUnboxMethodForPrimitive(Class<?> methodReturnType) {

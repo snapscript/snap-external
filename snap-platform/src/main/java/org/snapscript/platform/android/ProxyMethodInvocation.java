@@ -70,7 +70,11 @@ public class ProxyMethodInvocation implements Invocation {
       @Override
       public void run() {
          if(filter.accept(method)) { // in a private dex class loader
-            reference = generator.generate(method);
+            ProxyAdapter adapter = generator.generate(method);
+            
+            if(adapter != null) {
+               reference = adapter;
+            }
          }
       }
    }

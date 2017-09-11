@@ -17,19 +17,25 @@ public class ProxyAdapterBuilder {
       Class adapter = loader.loadClass(method);
       
       try {
-         return (ProxyAdapter)adapter.newInstance();
+         if(adapter != null) {
+            return (ProxyAdapter)adapter.newInstance();
+         }
       }catch(Exception e) {
          throw new IllegalStateException("Could not create adapter " + adapter, e);
       }
+      return null;
    }
    
    public ProxyAdapter generate(Constructor constructor) {
       Class adapter = loader.loadClass(constructor);
       
       try {
-         return (ProxyAdapter)adapter.newInstance();
+         if(adapter != null) {
+            return (ProxyAdapter)adapter.newInstance();
+         }
       }catch(Exception e) {
          throw new IllegalStateException("Could not create adapter " + adapter, e);
       }
+      return null;
    }
 }

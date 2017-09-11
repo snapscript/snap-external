@@ -70,7 +70,11 @@ public class ProxyConstructorInvocation implements Invocation {
       @Override
       public void run() {
          if(filter.accept(constructor)) { // in a private dex class loader
-            reference = generator.generate(constructor);
+            ProxyAdapter adapter = generator.generate(constructor);
+         
+            if(adapter != null) {
+               reference = adapter;
+            }
          }
       }
    }
