@@ -2,10 +2,10 @@ package org.snapscript.platform.generate;
 
 import org.snapscript.core.ArrayTable;
 import org.snapscript.core.Index;
-import org.snapscript.core.StackIndex;
 import org.snapscript.core.MapState;
 import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
+import org.snapscript.core.StackIndex;
 import org.snapscript.core.State;
 import org.snapscript.core.Table;
 import org.snapscript.core.Type;
@@ -39,6 +39,11 @@ public class BridgeInstance implements Instance {
    @Override
    public Bridge getBridge() {
       return holder.getBridge();
+   }
+   
+   @Override
+   public Object getProxy(){
+      return null;
    }
 
    @Override
