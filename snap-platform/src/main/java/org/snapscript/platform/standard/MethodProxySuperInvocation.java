@@ -30,7 +30,7 @@ public class MethodProxySuperInvocation implements Invocation {
          }
          return proxy.invokeSuper(value, arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + signature, e);
       }
    }
 }

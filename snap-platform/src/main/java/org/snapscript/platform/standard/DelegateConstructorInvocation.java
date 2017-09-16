@@ -19,7 +19,7 @@ public class DelegateConstructorInvocation implements Invocation {
       try {
          return constructor.newInstance(arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + constructor, e);
       }
    }
 }

@@ -13,11 +13,13 @@ public class ProxyConstructorInvocation implements Invocation {
    
    private volatile ConstructorExchanger exchanger;
    private volatile ProxyAdapter reference;
+   private volatile Constructor constructor;
    private volatile Executor executor;
    
    public ProxyConstructorInvocation(ProxyAdapterBuilder generator, Constructor constructor, Executor executor) {
       this.exchanger = new ConstructorExchanger(generator, constructor);
       this.reference = new ConstructorAdapter(constructor);
+      this.constructor = constructor;
       this.executor = executor;
    }
 
@@ -26,7 +28,7 @@ public class ProxyConstructorInvocation implements Invocation {
       try {
          return reference.invoke(value, arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + constructor, e);
       }
    }
    

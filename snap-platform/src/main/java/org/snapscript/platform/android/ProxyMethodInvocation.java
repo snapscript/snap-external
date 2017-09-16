@@ -14,11 +14,13 @@ public class ProxyMethodInvocation implements Invocation {
    private volatile MethodExchanger exchanger;
    private volatile ProxyAdapter reference;
    private volatile Executor executor;
+   private volatile Method method;
    
    public ProxyMethodInvocation(ProxyAdapterBuilder generator, Method method, Executor executor) {
       this.exchanger = new MethodExchanger(generator, method);
       this.reference = new MethodAdapter(method);
       this.executor = executor;
+      this.method = method;
    }
 
    @Override
@@ -26,7 +28,7 @@ public class ProxyMethodInvocation implements Invocation {
       try {
          return reference.invoke(value, arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + method, e);
       }
    }
    

@@ -19,7 +19,7 @@ public class DelegateMethodInvocation implements Invocation {
       try {
          return method.invoke(value, arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + method, e);
       }
    }
 }

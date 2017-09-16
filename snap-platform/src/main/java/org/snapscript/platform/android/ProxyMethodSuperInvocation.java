@@ -20,7 +20,7 @@ public class ProxyMethodSuperInvocation implements Invocation {
       try {
          return ProxyBuilder.callSuper(value, method, arguments);
       }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke super", e);
+         throw new InternalStateException("Could not invoke " + method, e);
       }
    }
 }
