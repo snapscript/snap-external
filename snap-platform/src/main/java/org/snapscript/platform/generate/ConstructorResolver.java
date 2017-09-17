@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
+import org.snapscript.core.bind.FunctionCall;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.function.ArgumentConverter;
 import org.snapscript.core.function.Function;
@@ -24,7 +25,8 @@ public class ConstructorResolver {
 
    public ConstructorArguments resolve(Scope scope, Type type, Object... args) {
       try {
-         Function function = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
+         FunctionCall call = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
+         Function function = call.getFunction();
          Signature signature = function.getSignature();
          ArgumentConverter converter = signature.getConverter();
          List<Parameter> parameters = signature.getParameters();

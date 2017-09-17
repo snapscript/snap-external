@@ -10,10 +10,10 @@ import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
 import org.snapscript.core.bind.FunctionBinder;
+import org.snapscript.core.bind.FunctionCall;
 import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.define.Instance;
-import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.platform.Platform;
@@ -58,12 +58,12 @@ public class InvocationRouter {
       String name = method.getName();
       Type type = instance.getType();
       Scope scope = binder.bind(instance, instance);
-      Function function = resolver.resolve(type, name, list); 
+      FunctionCall match = resolver.resolve(type, name, list); 
       
-      if (comparator.isAbstract(function)) {
+      if (comparator.isAbstract(match)) {
          throw new InternalStateException("No implementaton of " + method + " for '" + type + "'");
       }
-      if (comparator.isEqual(function, method)) {
+      if (comparator.isEqual(match, method)) {
          return builder.createSuperMethod(type, method);
       }
       Module module = scope.getModule();

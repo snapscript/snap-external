@@ -4,6 +4,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.snapscript.core.bind.FunctionCall;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Signature;
 
@@ -13,8 +14,9 @@ public class MethodComparator {
       super();
    }
    
-   public boolean isAbstract(Function function) {
-      if(function != null) {
+   public boolean isAbstract(FunctionCall call) {
+      if(call != null) {
+         Function function = call.getFunction();
          Signature signature = function.getSignature();
          
          if(signature != null) {
@@ -24,8 +26,9 @@ public class MethodComparator {
       return true;
    }
 
-   public boolean isEqual(Function function, Method method) {
-      if(function != null) {
+   public boolean isEqual(FunctionCall call, Method method) {
+      if(call != null) {
+         Function function = call.getFunction();
          Signature signature = function.getSignature();
          Member source = signature.getSource();
          

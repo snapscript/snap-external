@@ -11,7 +11,7 @@ import org.snapscript.core.platform.Platform;
 public class MockInstanceBuilder {
    
    public static void createInstance(Context context) throws Exception {
-      CachePlatformProvider provider = new CachePlatformProvider(context.getExtractor());
+      CachePlatformProvider provider = new CachePlatformProvider(context.getExtractor(), context.getStack());
       
       Platform builder = provider.create();
       Invocation invocation = builder.createSuperConstructor(context.getLoader().defineType("foo", "Foo", CLASS), context.getLoader().resolveType("javax.swing.JPanel"));
