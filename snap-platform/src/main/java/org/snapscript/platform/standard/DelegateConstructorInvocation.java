@@ -23,4 +23,3 @@ public class DelegateConstructorInvocation implements Invocation {
       }
    }
 }
-   
