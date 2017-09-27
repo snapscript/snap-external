@@ -15,7 +15,7 @@ import org.snapscript.core.Context;
 // this test can be disabled
 public class TestSuiteTest extends TestCase {
    
-   private static final String LOCATION_OF_TEST_SUITE = "../../snap-develop/snap-develop/work/test";
+   private static final String LOCATION_OF_TEST_SUITE = "../../snap-develop/snap-studio/work/test";
 
    private static final String SOURCE = 
    "import test.TestCaseRunner;\n"+

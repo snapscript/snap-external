@@ -15,7 +15,7 @@ import org.snapscript.core.Context;
 public class GameDebugger {
 
    public static void main(String[] list) throws Exception {
-      File file = new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-develop\\work\\games");
+      File file = new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games");
       Store store = new FileStore(file);
       Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
