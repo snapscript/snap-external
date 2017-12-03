@@ -15,8 +15,10 @@ import org.snapscript.core.Context;
 public class GameDebugger {
 
    public static void main(String[] list) throws Exception {
-      File file = new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games");
-      Store store = new FileStore(file);
+      Store store = new FileStore(
+            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\src"),
+            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")
+      );
       Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
