@@ -680,7 +680,7 @@ public final class ProxyBuilder<T> {
                     .getMethod(superMethodName(method), method.getParameterTypes())
                     .invoke(proxy, args);
         } catch (InvocationTargetException e) {
-            throw e.getCause();
+            throw e.getTargetException();
         }
     }
 

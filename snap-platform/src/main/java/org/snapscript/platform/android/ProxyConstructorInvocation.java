@@ -1,6 +1,7 @@
 package org.snapscript.platform.android;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,11 +25,23 @@ public class ProxyConstructorInvocation implements Invocation {
    }
 
    @Override
-   public Object invoke(Scope scope, Object value, Object... arguments) {
+   public Object invoke(Scope scope, Object value, Object... arguments) throws Exception {
       try {
          return reference.invoke(value, arguments);
-      }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke " + constructor, e);
+      }catch(InvocationTargetException cause) {
+         Throwable target = cause.getTargetException();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + constructor, target);
+         }
+         throw cause;
+      }catch(InternalError cause) {
+         Throwable target = cause.getCause();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + constructor, target);
+         }
+         throw cause;
       }
    }
    

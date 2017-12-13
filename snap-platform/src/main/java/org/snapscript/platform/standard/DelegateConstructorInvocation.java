@@ -1,6 +1,7 @@
 package org.snapscript.platform.standard;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.snapscript.core.InternalStateException;
 import org.snapscript.core.Scope;
@@ -15,11 +16,23 @@ public class DelegateConstructorInvocation implements Invocation {
    }
 
    @Override
-   public Object invoke(Scope scope, Object value, Object... arguments) {
+   public Object invoke(Scope scope, Object value, Object... arguments) throws Exception {
       try {
          return constructor.newInstance(arguments);
-      }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke " + constructor, e);
+      }catch(InvocationTargetException cause) {
+         Throwable target = cause.getTargetException();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + constructor, target);
+         }
+         throw cause;
+      }catch(InternalError cause) {
+         Throwable target = cause.getCause();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + constructor, target);
+         }
+         throw cause;
       }
    }
 }

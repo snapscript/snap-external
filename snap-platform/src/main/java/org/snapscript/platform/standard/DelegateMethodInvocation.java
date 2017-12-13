@@ -1,5 +1,6 @@
 package org.snapscript.platform.standard;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.snapscript.core.InternalStateException;
@@ -15,11 +16,23 @@ public class DelegateMethodInvocation implements Invocation {
    }
 
    @Override
-   public Object invoke(Scope scope, Object value, Object... arguments) {
+   public Object invoke(Scope scope, Object value, Object... arguments) throws Exception {
       try {
          return method.invoke(value, arguments);
-      }catch(Throwable e) {
-         throw new InternalStateException("Could not invoke " + method, e);
+      }catch(InvocationTargetException cause) {
+         Throwable target = cause.getTargetException();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + method, target);
+         }
+         throw cause;
+      }catch(InternalError cause) {
+         Throwable target = cause.getCause();
+         
+         if(target != null) {
+            throw new InternalStateException("Error occured invoking " + method, target);
+         }
+         throw cause;
       }
    }
 }
