@@ -25,7 +25,7 @@ public class OverrideOverloadTest extends TestCase {
    "b.onMessage('message');\n";
 
    public void testOverrideOverload() throws Exception {
-      Compiler compiler = org.snapscript.platform.ClassPathCompilerBuilder.createCompiler();
+      Compiler compiler = ClassPathCompilerBuilder.createCompiler();
       System.err.println(SOURCE);
       Executable executable = compiler.compile(SOURCE);
       executable.execute();
