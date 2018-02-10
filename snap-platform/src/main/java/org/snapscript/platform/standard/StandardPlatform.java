@@ -10,6 +10,7 @@ import org.snapscript.core.platform.Platform;
 import org.snapscript.platform.InvocationRouter;
 import org.snapscript.platform.generate.BridgeConstructorBuilder;
 import org.snapscript.platform.generate.BridgeInstance;
+import org.snapscript.platform.shell.ShellFactory;
 
 public class StandardPlatform implements Platform {
    
@@ -18,6 +19,7 @@ public class StandardPlatform implements Platform {
    private final BridgeConstructorBuilder builder;
    private final EnhancerGenerator generator;
    private final InvocationRouter router;
+   private final ShellFactory factory;
    private final ThreadLocal local;
 
    public StandardPlatform(FunctionResolver resolver) {
@@ -27,6 +29,16 @@ public class StandardPlatform implements Platform {
       this.generator = new EnhancerGenerator(handler);
       this.builder = new BridgeConstructorBuilder(generator, resolver, local);
       this.resolver = new MethodInvocationResolver();
+      this.factory = new ShellFactory(generator);
+   }
+   
+   @Override
+   public Invocation createShellConstructor(Type real) {
+      try {
+         return factory.createInvocation(real);
+      } catch (Exception e) {
+         throw new IllegalStateException("Could not create shell for '" + real + "'", e);
+      } 
    }
 
    @Override

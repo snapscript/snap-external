@@ -12,6 +12,7 @@ import org.snapscript.platform.InvocationRouter;
 import org.snapscript.platform.ThreadLocalHandler;
 import org.snapscript.platform.generate.BridgeConstructorBuilder;
 import org.snapscript.platform.generate.BridgeInstance;
+import org.snapscript.platform.shell.ShellFactory;
 
 public class AndroidPlatform implements Platform {
 
@@ -21,6 +22,7 @@ public class AndroidPlatform implements Platform {
    private final InvocationHandler handler;
    private final InvocationRouter router;
    private final ProxyClassLoader loader;
+   private final ShellFactory factory;
    private final ThreadLocal local;
 
    public AndroidPlatform(FunctionResolver resolver) {
@@ -31,8 +33,18 @@ public class AndroidPlatform implements Platform {
       this.generator = new ProxyClassGenerator(loader);
       this.builder = new BridgeConstructorBuilder(generator, resolver, local);
       this.resolver = new ProxyInvocationResolver(loader);
+      this.factory = new ShellFactory(generator);
    }
 
+   @Override
+   public Invocation createShellConstructor(Type real) {
+      try {
+         return factory.createInvocation(real);
+      } catch (Exception e) {
+         throw new IllegalStateException("Could not create shell for '" + real + "'", e);
+      } 
+   }
+   
    @Override
    public Invocation createSuperConstructor(Type real, Type base) {
       try {
