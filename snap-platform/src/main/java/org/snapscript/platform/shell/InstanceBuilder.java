@@ -8,8 +8,6 @@ import org.snapscript.core.Scope;
 import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
-import org.snapscript.core.define.Instance;
-import org.snapscript.core.define.PrimitiveInstance;
 import org.snapscript.core.property.Property;
 
 public class InstanceBuilder implements ShellBuilder {
@@ -24,10 +22,10 @@ public class InstanceBuilder implements ShellBuilder {
       Scope scope = type.getScope();
       
       try {
-         Instance instance = new PrimitiveInstance(module, scope, type);
+         Scope outer = scope.getStack();
+         State state = outer.getState();
          List<Property> properties = type.getProperties();
-         State state = instance.getState();
-         Value value = Value.getTransient(instance);
+         Value value = Value.getTransient(outer, type);
          
          for(Property property : properties) {
             String name = property.getName();
@@ -40,7 +38,7 @@ public class InstanceBuilder implements ShellBuilder {
             }
          }
          state.add(Reserved.TYPE_THIS, value);
-         return instance;
+         return outer;
       }catch(Exception e) {
          e.printStackTrace();
          return null;
