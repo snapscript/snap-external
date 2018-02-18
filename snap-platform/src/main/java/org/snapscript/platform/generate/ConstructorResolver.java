@@ -4,6 +4,7 @@ import static org.snapscript.core.Reserved.TYPE_CONSTRUCTOR;
 
 import java.util.List;
 
+import org.snapscript.core.Constraint;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.bind.FunctionCall;
@@ -37,8 +38,9 @@ public class ConstructorResolver {
             
             for (int i = 0; i < types.length; i++) {
                Parameter parameter = parameters.get(i);
-               Type constraint = parameter.getType();
-               Class real = constraint.getType();
+               Constraint constraint = parameter.getType();
+               Type require = constraint.getType(scope);
+               Class real = require.getType();
                
                types[i] = real;
             }
