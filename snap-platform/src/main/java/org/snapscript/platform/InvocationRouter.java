@@ -69,7 +69,7 @@ public class InvocationRouter {
       Module module = scope.getModule();
       Context context = module.getContext();
       FunctionBinder binder = context.getBinder();
-      Callable<Value> call = binder.bind(scope, scope, name, list);
+      Callable<Value> call = binder.bindInstance(scope, scope, name, list);
       
       if (call == null) {
          return builder.createSuperMethod(type, method);
