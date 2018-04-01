@@ -7,12 +7,15 @@ import java.util.List;
 import org.snapscript.core.State;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
+import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.property.Property;
 
 public class BridgeInstanceConverter {
    
-   public BridgeInstanceConverter() {
-      super();
+   private final ProxyWrapper wrapper;
+   
+   public BridgeInstanceConverter(ProxyWrapper wrapper) {
+      this.wrapper = wrapper;
    }
 
    public void convert(BridgeInstance instance) {
@@ -30,7 +33,7 @@ public class BridgeInstanceConverter {
    }
 
    private void update(BridgeInstance instance, State state, Type type) {
-      List<Property> properties = type.getProperties();
+      List<Property> properties = type.getProperties();      
       
       for(Property property : properties) {
          String name = property.getName();
@@ -39,7 +42,7 @@ public class BridgeInstanceConverter {
             Object current = state.get(name);
             
             if(current == null) {
-               Value value = new BridgeValue(instance, property, name);
+               Value value = new BridgeValue(instance, wrapper, property, name);
                state.add(name, value);
             }
          }

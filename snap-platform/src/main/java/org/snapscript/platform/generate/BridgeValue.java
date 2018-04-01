@@ -1,18 +1,21 @@
 package org.snapscript.platform.generate;
 
 import org.snapscript.core.Value;
+import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.property.Property;
 
 public class BridgeValue extends Value {
 
    private final BridgeInstance instance;   
+   private final ProxyWrapper wrapper;
    private final Property property;
    private final String name;
 
-   public BridgeValue(BridgeInstance instance, Property property, String name) {
+   public BridgeValue(BridgeInstance instance, ProxyWrapper wrapper, Property property, String name) {
       this.instance = instance;
       this.property = property;
+      this.wrapper = wrapper;
       this.name = name;
    }
    
@@ -25,9 +28,10 @@ public class BridgeValue extends Value {
    public <T> T getValue() {
       try {
          BridgeHolder holder = instance.getHolder();
-         Bridge object = holder.getBridge();
+         Bridge bridge = holder.getBridge();         
+         Object object = property.getValue(bridge);
          
-         return (T)property.getValue(object);
+         return (T)wrapper.fromProxy(object);
       } catch(Exception e) {
          throw new IllegalStateException("Could not get '" + name + "'", e);
       }
@@ -37,9 +41,10 @@ public class BridgeValue extends Value {
    public void setValue(Object value) {
       try {
          BridgeHolder holder = instance.getHolder();
-         Bridge object = holder.getBridge();
+         Bridge bridge = holder.getBridge();
+         Object proxy = wrapper.toProxy(value);
          
-         property.setValue(object, value);
+         property.setValue(bridge, proxy);
       }catch(Exception e) {
          throw new IllegalStateException("Could not set '" + name + "'", e);
       }

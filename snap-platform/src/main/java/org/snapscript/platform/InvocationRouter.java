@@ -9,12 +9,13 @@ import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
 import org.snapscript.core.Value;
-import org.snapscript.core.bind.FunctionBinder;
-import org.snapscript.core.bind.FunctionCall;
-import org.snapscript.core.bind.FunctionResolver;
 import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.function.search.FunctionCall;
+import org.snapscript.core.function.search.FunctionPointer;
+import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.function.search.FunctionSearcher;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.tree.define.ThisScopeBinder;
@@ -58,7 +59,7 @@ public class InvocationRouter {
       String name = method.getName();
       Type type = instance.getType();
       Scope scope = binder.bind(instance, instance);
-      FunctionCall match = resolver.resolve(type, name, list); 
+      FunctionPointer match = resolver.resolve(type, name, list); 
       
       if (comparator.isAbstract(match)) {
          throw new InternalStateException("No implementaton of " + method + " for '" + type + "'");
@@ -68,8 +69,8 @@ public class InvocationRouter {
       }
       Module module = scope.getModule();
       Context context = module.getContext();
-      FunctionBinder binder = context.getBinder();
-      Callable<Value> call = binder.bindInstance(scope, scope, name, list);
+      FunctionSearcher binder = context.getSearcher();
+      FunctionCall call = binder.searchInstance(scope, scope, name, list);
       
       if (call == null) {
          return builder.createSuperMethod(type, method);
@@ -80,9 +81,9 @@ public class InvocationRouter {
    
    private static class CallableInvocation implements Invocation {
 
-      private final Callable<Value> call;
+      private final FunctionCall call;
       
-      public CallableInvocation(Callable<Value> call) {
+      public CallableInvocation(FunctionCall call) {
          this.call = call;
       }
       

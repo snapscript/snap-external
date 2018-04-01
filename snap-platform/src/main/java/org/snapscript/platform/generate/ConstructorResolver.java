@@ -4,15 +4,15 @@ import static org.snapscript.core.Reserved.TYPE_CONSTRUCTOR;
 
 import java.util.List;
 
-import org.snapscript.core.Constraint;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
-import org.snapscript.core.bind.FunctionCall;
-import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.constraint.Constraint;
 import org.snapscript.core.function.ArgumentConverter;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Parameter;
 import org.snapscript.core.function.Signature;
+import org.snapscript.core.function.search.FunctionPointer;
+import org.snapscript.core.function.search.FunctionResolver;
 
 public class ConstructorResolver {
    
@@ -26,7 +26,7 @@ public class ConstructorResolver {
 
    public ConstructorArguments resolve(Scope scope, Type type, Object... args) {
       try {
-         FunctionCall call = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
+         FunctionPointer call = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
          Function function = call.getFunction();
          Signature signature = function.getSignature();
          ArgumentConverter converter = signature.getConverter();

@@ -1,6 +1,7 @@
 package org.snapscript.platform;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.snapscript.common.store.FileStore;
@@ -10,7 +11,9 @@ import org.snapscript.compile.Compiler;
 import org.snapscript.compile.Executable;
 import org.snapscript.compile.ResourceCompiler;
 import org.snapscript.compile.StoreContext;
+import org.snapscript.compile.verify.VerifyException;
 import org.snapscript.core.Context;
+import org.snapscript.compile.verify.VerifyError;
 
 public class GameDebugger {
 
@@ -19,6 +22,10 @@ public class GameDebugger {
             new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\src"),
             new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")
       );
+//      Store store = new FileStore(
+//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\src"),
+//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\assets")
+//      );
       Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
@@ -26,6 +33,12 @@ public class GameDebugger {
       try {
          Executable executable = compiler.compile("/mario/MarioGame.snap");
          executable.execute();
+      } catch(VerifyException e){
+         List<VerifyError> errors = e.getErrors();
+         
+         for(VerifyError error : errors) {
+            System.err.println(error);
+         }
       } catch(Exception e){
          e.printStackTrace();
       }

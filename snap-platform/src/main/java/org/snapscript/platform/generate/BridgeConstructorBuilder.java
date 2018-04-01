@@ -2,8 +2,9 @@ package org.snapscript.platform.generate;
 
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
-import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.function.search.FunctionResolver;
 
 public class BridgeConstructorBuilder {
 
@@ -11,9 +12,9 @@ public class BridgeConstructorBuilder {
    private final BridgeInstanceBuilder builder;
    private final ThreadLocal local;
    
-   public BridgeConstructorBuilder(ClassGenerator generator, FunctionResolver resolver, ThreadLocal local) {
+   public BridgeConstructorBuilder(ClassGenerator generator, FunctionResolver resolver, ProxyWrapper wrapper, ThreadLocal local) {
       this.builder = new BridgeInstanceBuilder(generator, resolver);
-      this.converter = new BridgeInstanceConverter();
+      this.converter = new BridgeInstanceConverter(wrapper);
       this.local = local;
    }
    

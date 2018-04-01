@@ -3,7 +3,7 @@ package org.snapscript.platform.generate;
 import org.snapscript.core.Module;
 import org.snapscript.core.Scope;
 import org.snapscript.core.Type;
-import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.function.search.FunctionResolver;
 
 public class BridgeInstanceBuilder {
 

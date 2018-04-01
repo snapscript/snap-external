@@ -5,8 +5,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import org.snapscript.core.Type;
-import org.snapscript.core.bind.FunctionResolver;
+import org.snapscript.core.convert.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.function.search.FunctionResolver;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.platform.InvocationRouter;
 import org.snapscript.platform.ThreadLocalHandler;
@@ -23,13 +24,13 @@ public class AndroidPlatform implements Platform {
    private final ProxyClassLoader loader;
    private final ThreadLocal local;
 
-   public AndroidPlatform(FunctionResolver resolver) {
+   public AndroidPlatform(FunctionResolver resolver, ProxyWrapper wrapper) {
       this.router = new InvocationRouter(this, resolver);
       this.local = new ThreadLocal<BridgeInstance>();
       this.handler = new ThreadLocalHandler(local, router);
       this.loader = new ProxyClassLoader(handler);
       this.generator = new ProxyClassGenerator(loader);
-      this.builder = new BridgeConstructorBuilder(generator, resolver, local);
+      this.builder = new BridgeConstructorBuilder(generator, resolver, wrapper, local);
       this.resolver = new ProxyInvocationResolver(loader);
    }
 

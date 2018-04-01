@@ -23,7 +23,7 @@ public class BridgeBuilderTest extends TestCase {
    }
    
    public void createInstance(Context context) throws Exception {
-      CachePlatformProvider provider = new CachePlatformProvider(context.getExtractor(), context.getStack());
+      CachePlatformProvider provider = new CachePlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
       
       Type type = context.getLoader().defineType("foo", "Foo", CLASS);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
