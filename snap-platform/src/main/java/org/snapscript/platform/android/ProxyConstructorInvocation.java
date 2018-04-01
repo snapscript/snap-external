@@ -5,9 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.snapscript.core.InternalStateException;
-import org.snapscript.core.Scope;
+import org.snapscript.core.error.InternalStateException;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.scope.Scope;
 import org.snapscript.dx.stock.ProxyAdapter;
 
 public class ProxyConstructorInvocation implements Invocation {

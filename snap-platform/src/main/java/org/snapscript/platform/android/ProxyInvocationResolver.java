@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
-import org.snapscript.core.Type;
+import org.snapscript.core.type.Type;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.platform.InvocationCache;
 import org.snapscript.platform.InvocationCacheTable;

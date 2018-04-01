@@ -1,9 +1,9 @@
 package org.snapscript.platform.generate;
 
-import org.snapscript.core.Value;
-import org.snapscript.core.convert.ProxyWrapper;
+import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.property.Property;
+import org.snapscript.core.scope.Value;
 
 public class BridgeValue extends Value {
 

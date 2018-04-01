@@ -1,16 +1,16 @@
 package org.snapscript.platform.generate;
 
-import org.snapscript.core.ArrayTable;
-import org.snapscript.core.Index;
-import org.snapscript.core.MapState;
-import org.snapscript.core.Module;
-import org.snapscript.core.Scope;
-import org.snapscript.core.StackIndex;
-import org.snapscript.core.State;
-import org.snapscript.core.Table;
-import org.snapscript.core.Type;
-import org.snapscript.core.define.Instance;
+import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
+import org.snapscript.core.scope.MapState;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.scope.State;
+import org.snapscript.core.scope.index.ArrayTable;
+import org.snapscript.core.scope.index.Index;
+import org.snapscript.core.scope.index.StackIndex;
+import org.snapscript.core.scope.index.Table;
+import org.snapscript.core.scope.instance.Instance;
+import org.snapscript.core.type.Type;
 
 public class BridgeInstance implements Instance {
 

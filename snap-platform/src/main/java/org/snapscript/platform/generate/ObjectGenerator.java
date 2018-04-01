@@ -4,12 +4,12 @@ import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.Module;
-import org.snapscript.core.Scope;
-import org.snapscript.core.Type;
-import org.snapscript.core.TypeLoader;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.type.Type;
 import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
+import org.snapscript.core.type.TypeLoader;
 
 public class ObjectGenerator {
    

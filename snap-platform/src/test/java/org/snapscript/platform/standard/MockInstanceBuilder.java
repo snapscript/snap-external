@@ -1,12 +1,12 @@
 package org.snapscript.platform.standard;
 
-import static org.snapscript.core.Category.CLASS;
+import static org.snapscript.core.type.Category.CLASS;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.define.Instance;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.CachePlatformProvider;
 import org.snapscript.core.platform.Platform;
+import org.snapscript.core.scope.instance.Instance;
 
 public class MockInstanceBuilder {
    

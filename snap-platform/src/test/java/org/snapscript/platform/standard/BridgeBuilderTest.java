@@ -1,13 +1,13 @@
 package org.snapscript.platform.standard;
 
-import static org.snapscript.core.Category.CLASS;
+import static org.snapscript.core.type.Category.CLASS;
 import junit.framework.TestCase;
 
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
 import org.snapscript.core.Context;
-import org.snapscript.core.Type;
-import org.snapscript.core.define.Instance;
+import org.snapscript.core.scope.instance.Instance;
+import org.snapscript.core.type.Type;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.CachePlatformProvider;
 import org.snapscript.core.platform.Platform;

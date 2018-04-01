@@ -3,8 +3,8 @@ package org.snapscript.platform.standard;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.snapscript.core.Type;
-import org.snapscript.core.convert.ProxyWrapper;
+import org.snapscript.core.type.Type;
+import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.function.search.FunctionResolver;
 import org.snapscript.core.platform.Platform;

@@ -4,10 +4,10 @@ import static org.snapscript.core.Reserved.TYPE_THIS;
 
 import java.util.List;
 
-import org.snapscript.core.State;
-import org.snapscript.core.Type;
-import org.snapscript.core.Value;
-import org.snapscript.core.convert.ProxyWrapper;
+import org.snapscript.core.scope.State;
+import org.snapscript.core.scope.Value;
+import org.snapscript.core.type.Type;
+import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.property.Property;
 
 public class BridgeInstanceConverter {

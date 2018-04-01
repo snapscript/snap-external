@@ -3,9 +3,9 @@ package org.snapscript.platform.standard;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.snapscript.core.InternalStateException;
-import org.snapscript.core.Scope;
+import org.snapscript.core.error.InternalStateException;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.scope.Scope;
 
 public class DelegateMethodInvocation implements Invocation {
    

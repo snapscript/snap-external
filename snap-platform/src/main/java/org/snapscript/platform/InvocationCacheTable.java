@@ -1,6 +1,6 @@
 package org.snapscript.platform;
 
-import org.snapscript.core.Type;
+import org.snapscript.core.type.Type;
 
 public class InvocationCacheTable<T> {
 

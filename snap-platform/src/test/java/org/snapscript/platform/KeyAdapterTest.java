@@ -11,8 +11,8 @@ import junit.framework.TestCase;
 
 import org.snapscript.compile.Compiler;
 import org.snapscript.compile.Executable;
-import org.snapscript.core.MapModel;
-import org.snapscript.core.Model;
+import org.snapscript.core.scope.MapModel;
+import org.snapscript.core.scope.Model;
 
 public class KeyAdapterTest extends TestCase {
 

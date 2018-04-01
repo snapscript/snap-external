@@ -3,7 +3,7 @@ package org.snapscript.platform.standard;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.snapscript.core.Type;
+import org.snapscript.core.type.Type;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.platform.InvocationCache;
 import org.snapscript.platform.InvocationCacheTable;
