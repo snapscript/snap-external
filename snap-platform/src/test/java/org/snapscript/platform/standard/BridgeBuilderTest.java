@@ -6,11 +6,11 @@ import junit.framework.TestCase;
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
 import org.snapscript.core.Context;
+import org.snapscript.core.function.Invocation;
+import org.snapscript.core.platform.Platform;
+import org.snapscript.core.platform.PlatformProvider;
 import org.snapscript.core.scope.instance.Instance;
 import org.snapscript.core.type.Type;
-import org.snapscript.core.function.Invocation;
-import org.snapscript.core.platform.CachePlatformProvider;
-import org.snapscript.core.platform.Platform;
 
 public class BridgeBuilderTest extends TestCase {
    
@@ -23,7 +23,7 @@ public class BridgeBuilderTest extends TestCase {
    }
    
    public void createInstance(Context context) throws Exception {
-      CachePlatformProvider provider = new CachePlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
+      PlatformProvider provider = new PlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
       
       Type type = context.getLoader().defineType("foo", "Foo", CLASS);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
