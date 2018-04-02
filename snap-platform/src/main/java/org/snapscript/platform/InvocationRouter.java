@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
 import org.snapscript.core.Context;
+import org.snapscript.core.ThisBinder;
 import org.snapscript.core.scope.Scope;
 import org.snapscript.core.scope.Value;
 import org.snapscript.core.scope.instance.Instance;
@@ -18,18 +19,17 @@ import org.snapscript.core.function.search.FunctionSearcher;
 import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.platform.Platform;
-import org.snapscript.tree.define.ThisScopeBinder;
 
 public class InvocationRouter {
 
    private final MethodComparator comparator;
    private final FunctionResolver resolver;
-   private final ThisScopeBinder binder;
+   private final ThisBinder binder;
    private final Platform builder;
    
    public InvocationRouter(Platform builder, FunctionResolver resolver) {
       this.comparator = new MethodComparator();
-      this.binder = new ThisScopeBinder();
+      this.binder = new ThisBinder();
       this.resolver = resolver;
       this.builder = builder;
    }

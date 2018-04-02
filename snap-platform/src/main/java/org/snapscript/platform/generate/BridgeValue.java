@@ -43,7 +43,7 @@ public class BridgeValue extends Value {
          BridgeHolder holder = instance.getHolder();
          Bridge bridge = holder.getBridge();
          Object proxy = wrapper.toProxy(value);
-         
+
          property.setValue(bridge, proxy);
       }catch(Exception e) {
          throw new IllegalStateException("Could not set '" + name + "'", e);
