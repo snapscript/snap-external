@@ -1,9 +1,10 @@
 package org.snapscript.platform;
 
+import junit.framework.TestCase;
+
 import org.snapscript.compile.Compiler;
 import org.snapscript.compile.Executable;
-
-import junit.framework.TestCase;
+import org.snapscript.compile.verify.VerifyException;
 
 public class ReferenceVariableInSubclassTest extends TestCase {
    
@@ -22,7 +23,7 @@ public class ReferenceVariableInSubclassTest extends TestCase {
    "   }\n"+
    "}\n"+
    "class TetrisScreen extends Screen{\n"+
-   "   private var score: Integer;\n"+
+   "   var score: Integer;\n"+
    "   public new(game) :super(game){\n"+
    "      this.score = 11;\n"+
    "   }\n"+
@@ -45,7 +46,7 @@ public class ReferenceVariableInSubclassTest extends TestCase {
    "   }\n"+
    "}\n"+
    "class TetrisScreen extends Screen{\n"+
-   "   private var score: Integer;\n"+
+   "   var score: Integer;\n"+
    "   public new(game) :super(game){\n"+
    "      this.score = 11;\n"+
    "   }\n"+
@@ -88,9 +89,9 @@ public class ReferenceVariableInSubclassTest extends TestCase {
          System.err.println(SOURCE_2);
          Executable executable = compiler.compile(SOURCE_2);
          executable.execute();
-      } catch(Exception e) {
+      } catch(VerifyException e) {
          failure=true;
-         e.printStackTrace();
+         e.getErrors().get(0).getCause().printStackTrace();
       }
       assertTrue("Should be a compile error", failure);
    }
