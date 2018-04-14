@@ -68,8 +68,8 @@ public class InvocationRouter {
       }
       Module module = scope.getModule();
       Context context = module.getContext();
-      FunctionResolver binder = context.getSearcher();
-      FunctionCall call = binder.resolveInstance(scope, scope, name, list);
+      FunctionResolver resolver = context.getResolver();
+      FunctionCall call = resolver.resolveInstance(scope, scope, name, list);
       
       if (call == null) {
          return builder.createSuperMethod(type, method);
