@@ -16,11 +16,12 @@ import org.snapscript.core.Context;
 public class TestSuiteTest extends TestCase {
    
    private static final String LOCATION_OF_TEST_SUITE = "../../snap-develop/snap-studio/work/test";
-
+   
+   private static final String PATTERN = ".*";
    private static final String SOURCE = 
-   "import test.TestCaseRunner;\n"+
+   "import test.TestCaseRunner;\n"+   
    "const runner = new TestCaseRunner('%s');\n"+
-   "assert runner.runTests();\n";
+   "assert runner.runTests(name -> name.matches(`" + PATTERN + "`));\n";
          
    public void testSuite() throws Exception {
       File file = new File(LOCATION_OF_TEST_SUITE);

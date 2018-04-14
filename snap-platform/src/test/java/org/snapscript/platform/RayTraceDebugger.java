@@ -24,8 +24,8 @@ public class RayTraceDebugger {
       Compiler compiler = new ResourceCompiler(context);
       
       try {
-         Executable executable = compiler.compile("/ray_tracer.snap");
-         //Executable executable = compiler.compile("/ray_tracer_no_constraints.snap");
+         //Executable executable = compiler.compile("/ray_tracer.snap");
+         Executable executable = compiler.compile("/ray_tracer_no_constraints.snap");
          executable.execute();
       } catch(Exception e){
          e.printStackTrace();
