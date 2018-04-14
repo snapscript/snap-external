@@ -4,29 +4,29 @@ import static org.snapscript.core.Reserved.TYPE_CONSTRUCTOR;
 
 import java.util.List;
 
-import org.snapscript.core.scope.Scope;
-import org.snapscript.core.type.Type;
 import org.snapscript.core.constraint.Constraint;
 import org.snapscript.core.function.ArgumentConverter;
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Parameter;
 import org.snapscript.core.function.Signature;
-import org.snapscript.core.function.search.FunctionPointer;
-import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.function.index.FunctionIndexer;
+import org.snapscript.core.function.index.FunctionPointer;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.type.Type;
 
 public class ConstructorResolver {
    
-   private final FunctionResolver resolver;
+   private final FunctionIndexer indexer;
    private final Class[] empty;
    
-   public ConstructorResolver(FunctionResolver resolver) {
+   public ConstructorResolver(FunctionIndexer indexer) {
       this.empty = new Class[]{};
-      this.resolver = resolver;
+      this.indexer = indexer;
    }
 
    public ConstructorArguments resolve(Scope scope, Type type, Object... args) {
       try {
-         FunctionPointer call = resolver.resolve(type, TYPE_CONSTRUCTOR, args);
+         FunctionPointer call = indexer.index(type, TYPE_CONSTRUCTOR, args);
          Function function = call.getFunction();
          Signature signature = function.getSignature();
          ArgumentConverter converter = signature.getConverter();

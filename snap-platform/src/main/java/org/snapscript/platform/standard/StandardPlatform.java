@@ -3,11 +3,11 @@ package org.snapscript.platform.standard;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.function.index.FunctionIndexer;
 import org.snapscript.core.platform.Platform;
+import org.snapscript.core.type.Type;
 import org.snapscript.platform.InvocationRouter;
 import org.snapscript.platform.generate.BridgeConstructorBuilder;
 import org.snapscript.platform.generate.BridgeInstance;
@@ -21,12 +21,12 @@ public class StandardPlatform implements Platform {
    private final InvocationRouter router;
    private final ThreadLocal local;
 
-   public StandardPlatform(FunctionResolver resolver, ProxyWrapper wrapper) {
-      this.router = new InvocationRouter(this, resolver);
+   public StandardPlatform(FunctionIndexer indexer, ProxyWrapper wrapper) {
+      this.router = new InvocationRouter(this, indexer);
       this.local = new ThreadLocal<BridgeInstance>();
       this.handler = new MethodInterceptorHandler(local, router);
       this.generator = new EnhancerGenerator(handler);
-      this.builder = new BridgeConstructorBuilder(generator, resolver, wrapper, local);
+      this.builder = new BridgeConstructorBuilder(generator, indexer, wrapper, local);
       this.resolver = new MethodInvocationResolver();
    }
 

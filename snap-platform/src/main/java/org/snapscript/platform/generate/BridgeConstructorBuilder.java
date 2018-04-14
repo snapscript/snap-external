@@ -1,10 +1,10 @@
 package org.snapscript.platform.generate;
 
-import org.snapscript.core.scope.Scope;
-import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.function.index.FunctionIndexer;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.type.Type;
 
 public class BridgeConstructorBuilder {
 
@@ -12,8 +12,8 @@ public class BridgeConstructorBuilder {
    private final BridgeInstanceBuilder builder;
    private final ThreadLocal local;
    
-   public BridgeConstructorBuilder(ClassGenerator generator, FunctionResolver resolver, ProxyWrapper wrapper, ThreadLocal local) {
-      this.builder = new BridgeInstanceBuilder(generator, resolver);
+   public BridgeConstructorBuilder(ClassGenerator generator, FunctionIndexer indexer, ProxyWrapper wrapper, ThreadLocal local) {
+      this.builder = new BridgeInstanceBuilder(generator, indexer);
       this.converter = new BridgeInstanceConverter(wrapper);
       this.local = local;
    }

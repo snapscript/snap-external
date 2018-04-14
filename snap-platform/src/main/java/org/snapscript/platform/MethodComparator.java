@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 
 import org.snapscript.core.function.Function;
 import org.snapscript.core.function.Signature;
-import org.snapscript.core.function.search.FunctionPointer;
+import org.snapscript.core.function.index.FunctionPointer;
 
 public class MethodComparator {
    

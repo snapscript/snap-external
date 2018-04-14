@@ -1,36 +1,35 @@
 package org.snapscript.platform;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 
 import org.snapscript.core.Context;
 import org.snapscript.core.InternalStateException;
 import org.snapscript.core.ThisBinder;
-import org.snapscript.core.scope.Scope;
-import org.snapscript.core.scope.Value;
-import org.snapscript.core.scope.instance.Instance;
-import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
-import org.snapscript.core.function.search.FunctionCall;
-import org.snapscript.core.function.search.FunctionPointer;
-import org.snapscript.core.function.search.FunctionResolver;
-import org.snapscript.core.function.search.FunctionSearcher;
+import org.snapscript.core.function.index.FunctionIndexer;
+import org.snapscript.core.function.index.FunctionPointer;
+import org.snapscript.core.function.resolve.FunctionCall;
+import org.snapscript.core.function.resolve.FunctionResolver;
 import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.platform.Platform;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.scope.instance.Instance;
+import org.snapscript.core.type.Type;
+import org.snapscript.core.variable.Value;
 
 public class InvocationRouter {
 
    private final MethodComparator comparator;
-   private final FunctionResolver resolver;
+   private final FunctionIndexer indexer;
    private final ThisBinder binder;
    private final Platform builder;
    
-   public InvocationRouter(Platform builder, FunctionResolver resolver) {
+   public InvocationRouter(Platform builder, FunctionIndexer indexer) {
       this.comparator = new MethodComparator();
       this.binder = new ThisBinder();
-      this.resolver = resolver;
+      this.indexer = indexer;
       this.builder = builder;
    }
    
@@ -59,7 +58,7 @@ public class InvocationRouter {
       String name = method.getName();
       Type type = instance.getType();
       Scope scope = binder.bind(instance, instance);
-      FunctionPointer match = resolver.resolve(type, name, list); 
+      FunctionPointer match = indexer.index(type, name, list); 
       
       if (comparator.isAbstract(match)) {
          throw new InternalStateException("No implementaton of " + method + " for '" + type + "'");
@@ -69,8 +68,8 @@ public class InvocationRouter {
       }
       Module module = scope.getModule();
       Context context = module.getContext();
-      FunctionSearcher binder = context.getSearcher();
-      FunctionCall call = binder.searchInstance(scope, scope, name, list);
+      FunctionResolver binder = context.getSearcher();
+      FunctionCall call = binder.resolveInstance(scope, scope, name, list);
       
       if (call == null) {
          return builder.createSuperMethod(type, method);

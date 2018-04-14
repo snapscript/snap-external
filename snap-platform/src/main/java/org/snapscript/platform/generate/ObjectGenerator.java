@@ -4,11 +4,11 @@ import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.scope.Scope;
-import org.snapscript.core.type.Type;
-import org.snapscript.core.function.search.FunctionResolver;
+import org.snapscript.core.function.index.FunctionIndexer;
 import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
+import org.snapscript.core.scope.Scope;
+import org.snapscript.core.type.Type;
 import org.snapscript.core.type.TypeLoader;
 
 public class ObjectGenerator {
@@ -16,8 +16,8 @@ public class ObjectGenerator {
    private final ConstructorResolver resolver;
    private final ClassGenerator generator;
    
-   public ObjectGenerator(ClassGenerator generator, FunctionResolver resolver) {
-      this.resolver = new ConstructorResolver(resolver);
+   public ObjectGenerator(ClassGenerator generator, FunctionIndexer indexer) {
+      this.resolver = new ConstructorResolver(indexer);
       this.generator = generator;
    }
 
