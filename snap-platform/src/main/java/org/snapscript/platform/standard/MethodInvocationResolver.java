@@ -24,7 +24,7 @@ public class MethodInvocationResolver {
       
       if(invocation == null) {
          invocation = builder.createSuperMethod(method);
-         cache.cache(real, invocation);
+         cache.cache(method, invocation);
       }
       return invocation;
    }
