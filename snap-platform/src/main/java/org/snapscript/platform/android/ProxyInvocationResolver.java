@@ -13,8 +13,8 @@ import org.snapscript.platform.InvocationCacheTable;
 public class ProxyInvocationResolver {
    
    private final Cache<Object, Invocation> adapters;
-   private final InvocationCacheTable table;
    private final ProxyInvocationBuilder builder;
+   private final InvocationCacheTable table;
 
    public ProxyInvocationResolver(ProxyClassLoader generator) {
       this.adapters = new CopyOnWriteCache<Object, Invocation>();
