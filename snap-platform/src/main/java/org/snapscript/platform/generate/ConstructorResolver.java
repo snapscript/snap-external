@@ -38,7 +38,7 @@ public class ConstructorResolver {
             
             for (int i = 0; i < types.length; i++) {
                Parameter parameter = parameters.get(i);
-               Constraint constraint = parameter.getType();
+               Constraint constraint = parameter.getConstraint();
                Type require = constraint.getType(scope);
                Class real = require.getType();
                
