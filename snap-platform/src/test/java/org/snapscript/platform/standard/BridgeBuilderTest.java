@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import org.snapscript.common.store.ClassPathStore;
 import org.snapscript.compile.StoreContext;
 import org.snapscript.core.Context;
+import org.snapscript.core.constraint.Constraint;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.core.platform.PlatformProvider;
@@ -28,7 +29,7 @@ public class BridgeBuilderTest extends TestCase {
       Type type = context.getLoader().defineType("foo", "Foo", CLASS);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
       
-      type.getTypes().add(panel);
+      type.getTypes().add(Constraint.getConstraint(panel));
 
       Platform builder = provider.create();
       Invocation invocation = builder.createSuperConstructor(type, panel);

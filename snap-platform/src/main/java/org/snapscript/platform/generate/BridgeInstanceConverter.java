@@ -4,11 +4,12 @@ import static org.snapscript.core.Reserved.TYPE_THIS;
 
 import java.util.List;
 
+import org.snapscript.core.constraint.Constraint;
+import org.snapscript.core.convert.proxy.ProxyWrapper;
+import org.snapscript.core.property.Property;
 import org.snapscript.core.scope.State;
 import org.snapscript.core.type.Type;
 import org.snapscript.core.variable.Value;
-import org.snapscript.core.convert.proxy.ProxyWrapper;
-import org.snapscript.core.property.Property;
 
 public class BridgeInstanceConverter {
    
@@ -21,13 +22,17 @@ public class BridgeInstanceConverter {
    public void convert(BridgeInstance instance) {
       Value self = Value.getReference(instance);
       Type base = instance.getBase(); // this might be the wrong type
-      List<Type> types = base.getTypes();
+      List<Constraint> types = base.getTypes();
       State state = instance.getState();
       
       update(instance, state, base);
       
-      for(Type type : types) {
-         update(instance, state, type);
+      for(Constraint type : types) {
+         Type match = type.getType(instance);
+         
+         if(match != null) {
+            update(instance, state, match);
+         }
       }
       state.add(TYPE_THIS, self);
    }
