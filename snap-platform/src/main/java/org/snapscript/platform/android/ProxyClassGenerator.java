@@ -1,19 +1,19 @@
 package org.snapscript.platform.android;
 
+import org.snapscript.core.EntityCache;
 import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.InterfaceCollector;
-import org.snapscript.core.type.TypeCache;
 import org.snapscript.platform.generate.ClassGenerator;
 
 public class ProxyClassGenerator implements ClassGenerator{
 
    private final ProxyClassLoader generator;
    private final InterfaceCollector collector;
-   private final TypeCache<Class> cache;
+   private final EntityCache<Class> cache;
    
    public ProxyClassGenerator(ProxyClassLoader generator) {
       this.collector = new InterfaceCollector();
-      this.cache = new TypeCache<Class>();
+      this.cache = new EntityCache<Class>();
       this.generator = generator;
    }
    

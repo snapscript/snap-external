@@ -7,8 +7,8 @@ import junit.framework.TestCase;
 import org.snapscript.cglib.proxy.Enhancer;
 import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.cglib.proxy.MethodProxy;
+import org.snapscript.core.Any;
 import org.snapscript.core.ContextClassLoader;
-import org.snapscript.core.type.Any;
 
 public class CglibProxyTest extends TestCase {
 

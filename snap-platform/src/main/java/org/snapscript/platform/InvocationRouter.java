@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 
 import org.snapscript.core.Context;
 import org.snapscript.core.InternalStateException;
-import org.snapscript.core.ThisBinder;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.function.index.FunctionIndexer;
@@ -15,6 +14,7 @@ import org.snapscript.core.module.Module;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.core.scope.Scope;
+import org.snapscript.core.scope.ScopeBinder;
 import org.snapscript.core.scope.instance.Instance;
 import org.snapscript.core.type.Type;
 import org.snapscript.core.variable.Value;
@@ -23,12 +23,12 @@ public class InvocationRouter {
 
    private final MethodComparator comparator;
    private final FunctionIndexer indexer;
-   private final ThisBinder binder;
+   private final ScopeBinder binder;
    private final Platform builder;
    
    public InvocationRouter(Platform builder, FunctionIndexer indexer) {
       this.comparator = new MethodComparator();
-      this.binder = new ThisBinder();
+      this.binder = new ScopeBinder();
       this.indexer = indexer;
       this.builder = builder;
    }

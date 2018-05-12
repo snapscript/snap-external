@@ -3,18 +3,18 @@ package org.snapscript.platform.standard;
 import org.snapscript.cglib.proxy.Callback;
 import org.snapscript.cglib.proxy.Enhancer;
 import org.snapscript.cglib.proxy.MethodInterceptor;
+import org.snapscript.core.Any;
 import org.snapscript.core.ContextClassLoader;
-import org.snapscript.core.type.Any;
+import org.snapscript.core.EntityCache;
 import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.InterfaceCollector;
 import org.snapscript.core.platform.Bridge;
-import org.snapscript.core.type.TypeCache;
 import org.snapscript.platform.generate.ClassGenerator;
 
 public class EnhancerGenerator implements ClassGenerator{
 
    private final InterfaceCollector collector;
-   private final TypeCache<Class> cache;
+   private final EntityCache<Class> cache;
    private final Callback[] interceptors;
    private final ClassLoader loader;
    
@@ -22,7 +22,7 @@ public class EnhancerGenerator implements ClassGenerator{
       this.interceptors = new Callback[] {interceptor};
       this.loader = new ContextClassLoader(Any.class);
       this.collector = new InterfaceCollector();
-      this.cache = new TypeCache<Class>();      
+      this.cache = new EntityCache<Class>();      
    }
    
    @Override

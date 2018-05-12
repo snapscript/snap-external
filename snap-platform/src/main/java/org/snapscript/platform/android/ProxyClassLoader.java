@@ -4,9 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.snapscript.core.Any;
 import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.platform.Bridge;
-import org.snapscript.core.type.Any;
 import org.snapscript.dx.stock.ProxyAdapterBuilder;
 import org.snapscript.dx.stock.ProxyBuilder;
 
