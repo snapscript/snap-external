@@ -32,13 +32,13 @@ public class GameDebugger {
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
 
-      //compile(store, executor);
+      compile(store, executor);
       execute(compiler);
    }
    
    private static void compile(Store store, Executor executor) {
       try {
-         for(int i = 0; i < 1000; i++) {
+         for(int i = 0; i < 10; i++) {
             long start = System.currentTimeMillis();
             Context context = new StoreContext(store, executor);
             Compiler compiler = new ResourceCompiler(context);
