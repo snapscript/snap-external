@@ -15,10 +15,10 @@ import org.snapscript.platform.generate.BridgeConstructorBuilder;
 import org.snapscript.platform.generate.BridgeInstance;
 
 public class AndroidPlatform implements Platform {
-
-   private final ProxyClassGenerator generator;   
+  
    private final BridgeConstructorBuilder builder;
    private final ProxyInvocationResolver resolver;
+   private final ProxyClassGenerator generator; 
    private final InvocationHandler handler;
    private final InvocationRouter router;
    private final ProxyClassLoader loader;

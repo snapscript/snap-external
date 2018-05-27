@@ -38,7 +38,7 @@ public class GameDebugger {
    
    private static void compile(Store store, Executor executor) {
       try {
-         for(int i = 0; i < 10; i++) {
+         for(int i = 0; i < 1000; i++) {
             long start = System.currentTimeMillis();
             Context context = new StoreContext(store, executor);
             Compiler compiler = new ResourceCompiler(context);

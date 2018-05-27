@@ -27,7 +27,7 @@ public class SuperConstructorCallsBaseMethodTest extends TestCase {
    "   new(x):super(x){}\n"+
    "   public override getVal(): Integer{\n"+
    "      return 3;\n"+
-   "   }\n"+
+   "   }\n"+ 
    "}\n"+      
    "class SomeBase extends SomeSuperCaller with Runnable {\n"+
    "   new(a,b) : super(a, b){\n"+
@@ -53,6 +53,10 @@ public class SuperConstructorCallsBaseMethodTest extends TestCase {
          this.x = x;
          this.y = y;
          this.result = getSomething();
+      }
+      
+      public void run(){
+         System.err.println("SomeSuperCaller.run()");
       }
       
       public void dump() {

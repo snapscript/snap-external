@@ -1,6 +1,6 @@
 package org.snapscript.platform.standard;
 
-import static org.snapscript.core.type.Category.CLASS;
+import static org.snapscript.core.ModifierType.CLASS;
 import junit.framework.TestCase;
 
 import org.snapscript.common.store.ClassPathStore;
@@ -26,7 +26,7 @@ public class BridgeBuilderTest extends TestCase {
    public void createInstance(Context context) throws Exception {
       PlatformProvider provider = new PlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
       
-      Type type = context.getLoader().defineType("foo", "Foo", CLASS);
+      Type type = context.getLoader().defineType("foo", "Foo", CLASS.mask);
       Type panel = context.getLoader().resolveType("javax.swing.JPanel");
       
       type.getTypes().add(Constraint.getConstraint(panel));

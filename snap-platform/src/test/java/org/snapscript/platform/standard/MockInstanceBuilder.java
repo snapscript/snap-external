@@ -1,8 +1,9 @@
 package org.snapscript.platform.standard;
 
-import static org.snapscript.core.type.Category.CLASS;
+import static org.snapscript.core.ModifierType.CLASS;
 
 import org.snapscript.core.Context;
+import org.snapscript.core.ModifierType;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.core.platform.PlatformProvider;
@@ -14,7 +15,7 @@ public class MockInstanceBuilder {
       PlatformProvider provider = new PlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
       
       Platform builder = provider.create();
-      Invocation invocation = builder.createSuperConstructor(context.getLoader().defineType("foo", "Foo", CLASS), context.getLoader().resolveType("javax.swing.JPanel"));
+      Invocation invocation = builder.createSuperConstructor(context.getLoader().defineType("foo", "Foo", CLASS.mask), context.getLoader().resolveType("javax.swing.JPanel"));
       Instance instance = (Instance)invocation.invoke(null, null);
 
       
