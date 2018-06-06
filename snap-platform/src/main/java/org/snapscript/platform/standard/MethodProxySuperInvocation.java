@@ -4,7 +4,7 @@ import org.snapscript.cglib.core.Signature;
 import org.snapscript.cglib.proxy.MethodProxy;
 import org.snapscript.common.Cache;
 import org.snapscript.common.CopyOnWriteCache;
-import org.snapscript.core.InternalStateException;
+import org.snapscript.core.error.InternalStateException;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.scope.Scope;
 

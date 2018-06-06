@@ -15,7 +15,7 @@ public class MockInstanceBuilder {
       PlatformProvider provider = new PlatformProvider(context.getExtractor(), context.getWrapper(), context.getStack());
       
       Platform builder = provider.create();
-      Invocation invocation = builder.createSuperConstructor(context.getLoader().defineType("foo", "Foo", CLASS.mask), context.getLoader().resolveType("javax.swing.JPanel"));
+      Invocation invocation = builder.createSuperConstructor(context.getLoader().defineType("foo", "Foo", CLASS.mask), context.getLoader().loadType("javax.swing.JPanel"));
       Instance instance = (Instance)invocation.invoke(null, null);
 
       

@@ -3,8 +3,8 @@ package org.snapscript.platform;
 import java.lang.reflect.Method;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.InternalStateException;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
+import org.snapscript.core.error.InternalStateException;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.function.index.FunctionIndexer;
 import org.snapscript.core.function.index.FunctionPointer;

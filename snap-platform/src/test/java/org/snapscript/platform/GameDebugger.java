@@ -20,25 +20,27 @@ import org.snapscript.core.scope.Model;
 public class GameDebugger {
 
    public static void main(String[] list) throws Exception {
-      Store store = new FileStore(
+      File[] roots = new File[] {
             new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\src"),
-            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")
-      );
-//      Store store = new FileStore(
-//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\src"),
-//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\assets")
-//      );
+            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")    
+      };
+//    File[] roots = new File[] {
+//    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\src"),
+//    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\assets")
+//    };
+      Store store = new FileStore(roots);
       Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
 
-      compile(store, executor);
+      compile(roots, executor);
       execute(compiler);
    }
    
-   private static void compile(Store store, Executor executor) {
+   private static void compile(File[] roots, Executor executor) {
       try {
          for(int i = 0; i < 1000; i++) {
+            Store store = new FileStore(roots);
             long start = System.currentTimeMillis();
             Context context = new StoreContext(store, executor);
             Compiler compiler = new ResourceCompiler(context);
