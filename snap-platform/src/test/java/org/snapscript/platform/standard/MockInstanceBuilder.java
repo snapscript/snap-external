@@ -3,7 +3,6 @@ package org.snapscript.platform.standard;
 import static org.snapscript.core.ModifierType.CLASS;
 
 import org.snapscript.core.Context;
-import org.snapscript.core.ModifierType;
 import org.snapscript.core.function.Invocation;
 import org.snapscript.core.platform.Platform;
 import org.snapscript.core.platform.PlatformProvider;

@@ -33,7 +33,7 @@ public class GameDebugger {
       Context context = new StoreContext(store, executor);
       Compiler compiler = new ResourceCompiler(context);
 
-      compile(roots, executor);
+      //compile(roots, executor);
       execute(compiler);
    }
    

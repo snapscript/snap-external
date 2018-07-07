@@ -63,7 +63,7 @@ public class InvocationRouter {
       if (comparator.isAbstract(match)) {
          throw new InternalStateException("No implementaton of " + method + " for '" + type + "'");
       }
-      if (comparator.isEqual(match, method)) {
+      if (comparator.isEqual(match, method)) { // could be slow on android
          return builder.createSuperMethod(type, method);
       }
       Module module = scope.getModule();

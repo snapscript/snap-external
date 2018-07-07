@@ -4,9 +4,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.snapscript.common.Cache;
-import org.snapscript.common.CopyOnWriteCache;
-import org.snapscript.core.type.Type;
+import org.snapscript.common.IdentityCache;
 import org.snapscript.core.function.Invocation;
+import org.snapscript.core.type.Type;
 import org.snapscript.platform.InvocationCache;
 import org.snapscript.platform.InvocationCacheTable;
 
@@ -17,9 +17,9 @@ public class ProxyInvocationResolver {
    private final InvocationCacheTable table;
 
    public ProxyInvocationResolver(ProxyClassLoader generator) {
-      this.adapters = new CopyOnWriteCache<Object, Invocation>();
+      this.table = new InvocationCacheTable(IdentityCache.class);
+      this.adapters = new IdentityCache<Object, Invocation>();
       this.builder = new ProxyInvocationBuilder(generator);
-      this.table = new InvocationCacheTable();
    }
 
    public Invocation resolveSuperMethod(Type real, Method method) {

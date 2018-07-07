@@ -1,5 +1,6 @@
 package org.snapscript.platform;
 
+import org.snapscript.common.Cache;
 import org.snapscript.core.type.Type;
 
 public class InvocationCacheTable<T> {
@@ -7,13 +8,13 @@ public class InvocationCacheTable<T> {
    private volatile InvocationCacheArray array;
    private volatile CacheAllocator allocator;
    
-   public InvocationCacheTable() {
-      this(10);
+   public InvocationCacheTable(Class<? extends Cache> internal) {
+      this(internal, 32);
    }
    
-   public InvocationCacheTable(int capacity) {
+   public InvocationCacheTable(Class<? extends Cache> internal, int capacity) {
       this.array = new InvocationCacheArray(capacity, capacity);
-      this.allocator = new CacheAllocator();
+      this.allocator = new CacheAllocator(internal);
    }
    
    public InvocationCache get(Type type) {
@@ -33,8 +34,10 @@ public class InvocationCacheTable<T> {
    
    private class CacheAllocator {
       
-      public CacheAllocator() {
-         super();
+      private final Class<? extends Cache> internal;
+      
+      public CacheAllocator(Class<? extends Cache> internal) {
+         this.internal = internal;
       }
       
       public synchronized InvocationCache allocate(Type type) {
@@ -43,7 +46,7 @@ public class InvocationCacheTable<T> {
          InvocationCache cache = local.get(index);
          
          if(cache == null) {
-            cache = new InvocationCache();
+            cache = new InvocationCache(internal);
             local.set(index, cache);
             array = local;
          }
