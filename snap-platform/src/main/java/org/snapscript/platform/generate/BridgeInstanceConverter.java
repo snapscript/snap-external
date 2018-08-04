@@ -20,8 +20,8 @@ public class BridgeInstanceConverter {
    }
 
    public void convert(BridgeInstance instance) {
-      Value self = Value.getReference(instance);
       Type base = instance.getBase(); // this might be the wrong type
+      Value self = Value.getReference(instance, base);
       List<Constraint> types = base.getTypes();
       State state = instance.getState();
       
