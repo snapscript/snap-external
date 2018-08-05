@@ -1,11 +1,8 @@
 package org.snapscript.platform.generate;
 
-import org.snapscript.core.Entity;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.platform.Bridge;
 import org.snapscript.core.property.Property;
-import org.snapscript.core.variable.Data;
-import org.snapscript.core.variable.DataMapper;
 import org.snapscript.core.variable.Value;
 
 public class BridgeValue extends Value {
@@ -26,17 +23,7 @@ public class BridgeValue extends Value {
    public boolean isProperty() {
       return true;
    }
-   
-   @Override
-   public Data getData() {
-      return DataMapper.toData(this);
-   }   
-   
-   @Override
-   public Entity getSource() {
-      return instance.getType();
-   }
-   
+
    @Override
    public <T> T getValue() {
       try {
@@ -51,12 +38,11 @@ public class BridgeValue extends Value {
    }
 
    @Override
-   public void setData(Data value) {
+   public void setValue(Object value) {
       try {
-         Object object = value.getValue();
          BridgeHolder holder = instance.getHolder();
          Bridge bridge = holder.getBridge();
-         Object proxy = wrapper.toProxy(object);
+         Object proxy = wrapper.toProxy(value);
 
          property.setValue(bridge, proxy);
       }catch(Exception e) {

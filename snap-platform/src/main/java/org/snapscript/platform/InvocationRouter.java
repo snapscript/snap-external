@@ -68,7 +68,7 @@ public class InvocationRouter {
       }
       Module module = scope.getModule();
       Context context = module.getContext();
-      Value target = Value.getTransient(scope, type);
+      Value target = Value.getTransient(scope);
       FunctionResolver resolver = context.getResolver();
       FunctionCall call = resolver.resolveInstance(scope, target, name, list);
       
