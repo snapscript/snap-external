@@ -34,7 +34,7 @@ public class BridgeInstanceConverter {
             update(instance, state, match);
          }
       }
-      state.add(TYPE_THIS, self);
+      state.addValue(TYPE_THIS, self);
    }
 
    private void update(BridgeInstance instance, State state, Type type) {
@@ -44,11 +44,11 @@ public class BridgeInstanceConverter {
          String name = property.getName();
 
          if(!name.equals(TYPE_THIS)) {
-            Object current = state.get(name);
+            Object current = state.getValue(name);
             
             if(current == null) {
                Value value = new BridgeValue(instance, wrapper, property, name);
-               state.add(name, value);
+               state.addValue(name, value);
             }
          }
       }
