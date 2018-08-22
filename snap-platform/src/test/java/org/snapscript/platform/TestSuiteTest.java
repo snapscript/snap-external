@@ -17,7 +17,7 @@ public class TestSuiteTest extends TestCase {
    
    private static final String LOCATION_OF_TEST_SUITE = "../../snap-develop/snap-studio/work/test";
    
-   private static final String PATTERN = ".*ClosureTest.*";
+   private static final String PATTERN = ".*ArrayOfObjectsTest.*";
    private static final String SOURCE = 
    "import test.TestCaseRunner;\n"+   
    "const runner = new TestCaseRunner('%s');\n"+
