@@ -6,9 +6,9 @@ import org.snapscript.cglib.proxy.MethodInterceptor;
 import org.snapscript.core.Any;
 import org.snapscript.core.ContextClassLoader;
 import org.snapscript.core.EntityCache;
-import org.snapscript.core.type.Type;
 import org.snapscript.core.convert.InterfaceCollector;
 import org.snapscript.core.platform.Bridge;
+import org.snapscript.core.type.Type;
 import org.snapscript.platform.generate.ClassGenerator;
 
 public class EnhancerGenerator implements ClassGenerator{
