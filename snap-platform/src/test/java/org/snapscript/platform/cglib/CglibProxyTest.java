@@ -39,7 +39,7 @@ public class CglibProxyTest extends TestCase {
    }
 
    public void testJPanel() throws Exception {
-      ContextClassLoader loader = new ContextClassLoader(Any.class);
+      ClassLoader loader = new ContextClassLoader(Any.class);
       Enhancer enhancer = new Enhancer();
       enhancer.setSuperclass(loader.loadClass("javax.swing.JPanel"));
       enhancer.setClassLoader(Any.class.getClassLoader());

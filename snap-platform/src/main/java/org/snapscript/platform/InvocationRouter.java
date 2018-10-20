@@ -88,10 +88,7 @@ public class InvocationRouter {
       
       @Override
       public Object invoke(Scope scope, Object object, Object... list) throws Exception {
-         Value value = call.call();
-         Object result = value.getValue();
-         
-         return result;
+         return call.invoke(scope, scope, list);
       }
       
    }
