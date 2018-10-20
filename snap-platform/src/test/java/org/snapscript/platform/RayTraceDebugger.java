@@ -14,6 +14,9 @@ import org.snapscript.core.Context;
 
 public class RayTraceDebugger {
 
+   // 27478
+   // 27603
+   // 27290
    public static void main(String[] list) throws Exception {
       Store store = new FileStore(
             new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\misc\\src"),

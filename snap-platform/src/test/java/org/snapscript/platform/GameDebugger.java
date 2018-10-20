@@ -20,14 +20,14 @@ import org.snapscript.core.scope.Model;
 public class GameDebugger {
 
    public static void main(String[] list) throws Exception {
-      File[] roots = new File[] {
-            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\src"),
-            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")    
-      };
-//    File[] roots = new File[] {
-//    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\src"),
-//    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\assets")
-//    };
+//      File[] roots = new File[] {
+//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\src"),
+//            new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\demo\\games\\assets")
+//      };
+    File[] roots = new File[] {
+    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\src"),
+    new File("C:\\Work\\development\\snapscript\\snap-develop\\snap-studio\\work\\games\\mario\\assets")
+    };
       Store store = new FileStore(roots);
       Executor executor = new ThreadPool(8);
       Context context = new StoreContext(store, executor);
