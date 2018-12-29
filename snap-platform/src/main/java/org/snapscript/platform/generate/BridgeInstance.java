@@ -11,6 +11,8 @@ import org.snapscript.core.scope.index.StackIndex;
 import org.snapscript.core.scope.index.Table;
 import org.snapscript.core.scope.instance.Instance;
 import org.snapscript.core.type.Type;
+import org.snapscript.core.variable.Reference;
+import org.snapscript.core.variable.Value;
 
 public class BridgeInstance implements Instance {
 
@@ -19,13 +21,15 @@ public class BridgeInstance implements Instance {
    private final Index index;
    private final Table table;
    private final State state;
+   private final Value self;
    private final Type real;
    private final Type base;
 
    public BridgeInstance(BridgeHolder holder, Module module, Scope scope, Type real, Type base) {
+      this.self = new Reference(this);
       this.state = new MapState(scope);
+      this.index = new StackIndex(scope);
       this.table = new ArrayTable();
-      this.index = new StackIndex();
       this.holder = holder;
       this.module = module;
       this.real = real;
@@ -39,6 +43,11 @@ public class BridgeInstance implements Instance {
    @Override
    public Bridge getBridge() {
       return holder.getBridge();
+   }
+   
+   @Override
+   public Value getThis() {
+      return self;
    }
    
    @Override

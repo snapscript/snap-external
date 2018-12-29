@@ -1,7 +1,5 @@
 package org.snapscript.platform.generate;
 
-import static org.snapscript.core.Reserved.TYPE_THIS;
-
 import java.util.List;
 
 import org.snapscript.core.constraint.Constraint;
@@ -21,7 +19,6 @@ public class BridgeInstanceConverter {
 
    public void convert(BridgeInstance instance) {
       Type base = instance.getBase(); // this might be the wrong type
-      Value self = Value.getReference(instance);
       List<Constraint> types = base.getTypes();
       State state = instance.getState();
       
@@ -34,7 +31,6 @@ public class BridgeInstanceConverter {
             update(instance, state, match);
          }
       }
-      state.addValue(TYPE_THIS, self);
    }
 
    private void update(BridgeInstance instance, State state, Type type) {
@@ -42,14 +38,11 @@ public class BridgeInstanceConverter {
       
       for(Property property : properties) {
          String name = property.getName();
-
-         if(!name.equals(TYPE_THIS)) {
-            Object current = state.getValue(name);
-            
-            if(current == null) {
-               Value value = new BridgeValue(instance, wrapper, property, name);
-               state.addValue(name, value);
-            }
+         Object current = state.getValue(name);
+         
+         if(current == null) {
+            Value value = new BridgeValue(instance, wrapper, property, name);
+            state.addValue(name, value);
          }
       }
    }
