@@ -5,7 +5,7 @@ import java.util.List;
 import org.snapscript.core.constraint.Constraint;
 import org.snapscript.core.convert.proxy.ProxyWrapper;
 import org.snapscript.core.property.Property;
-import org.snapscript.core.scope.State;
+import org.snapscript.core.scope.ScopeState;
 import org.snapscript.core.type.Type;
 import org.snapscript.core.variable.Value;
 
@@ -20,7 +20,7 @@ public class BridgeInstanceConverter {
    public void convert(BridgeInstance instance) {
       Type base = instance.getBase(); // this might be the wrong type
       List<Constraint> types = base.getTypes();
-      State state = instance.getState();
+      ScopeState state = instance.getState();
       
       update(instance, state, base);
       
@@ -33,7 +33,7 @@ public class BridgeInstanceConverter {
       }
    }
 
-   private void update(BridgeInstance instance, State state, Type type) {
+   private void update(BridgeInstance instance, ScopeState state, Type type) {
       List<Property> properties = type.getProperties();      
       
       for(Property property : properties) {
